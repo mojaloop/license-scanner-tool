@@ -12,7 +12,7 @@ default:
 ## 
 build:
 	@mkdir -p ${lib_dir}
-	@cd ${lib_dir} && git clone git@github.com:bcoe/toml-to-env.git
+	@cd ${lib_dir} && git clone git@github.com:vessels-tech/toml-to-env.git
 	@cd ${lib_dir}/toml-to-env && npm install
 
 ##
