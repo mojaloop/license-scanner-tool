@@ -8,6 +8,10 @@ A tool for scanning licenses of many nodejs projects at once.
 make build
 ```
 
+## Config
+
+You can edit the configuration in `./config.toml`
+
 
 ## Running
 

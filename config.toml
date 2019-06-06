@@ -4,10 +4,6 @@
 
 title = "License Scanner Config"
 
-# configure the tool to use.
-# currently only fossa is supported
-# tool = "fossa"
-
 # How we should process the licenses
 # options are: 
 # - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
