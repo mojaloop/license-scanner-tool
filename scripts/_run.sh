@@ -19,7 +19,7 @@ function runScannerTool() {
   fossa-json)
     runFossaJSON $1
     ;;
-  csv)
+  lc-csv)
     runCSV $1
     ;;
   *)
@@ -41,14 +41,13 @@ function runFossaJSON() {
   REPO_PATH=$1
   echo "Running fossa-json for repo: ${REPO_PATH}"
 
-  cd ${ROOT_DIR}/checked_out/${REPO_PATH}
-  # fossa analyze -o > ${ROOT_DIR}/results/${REPO_PATH}.json
+  fossa analyze -o > ${ROOT_DIR}/results/${REPO_PATH}.json
   fossa test
 }
 
 function runCSV() {
-  echo 'csv not yet implemented'
-  exit 1
+  echo "Running license-checker for repo: ${REPO_PATH}"
+  cd ${REPO_PATH} && ${LIB_DIR}/node_modules/.bin/license-checker . --csv --out ${ROOT_DIR}/results/${REPO_PATH}.csv
 }
 
 
