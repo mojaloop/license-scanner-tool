@@ -18,6 +18,8 @@ build:
 
 	@cd ${lib_dir}/ && npm install
 
+	@cd ${scripts_dir}/ && npm install
+
 ##
 # Set Up
 ##
@@ -52,9 +54,9 @@ cleanup:
 # Post-Processing
 ## 
 post-csv-to-excel:
-	#@can we do this: https://www.rondebruin.nl/win/s3/win021.htm ? 
-	@echo 'Not implemented yet'
-	@exit 1
+	@cd ${scripts_dir} && node _combine_csv_reports.js
+	@#fix issues with the xlsx package:
+	@mv ${scripts_dir}/.xlsx  $(dir)/results/license-summary.xlsx 
 
 
 post-summarize-csv:
