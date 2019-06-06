@@ -22,8 +22,8 @@ tool = "fossa-json"
 ##
 repos = [
   "https://github.com/mojaloop/account-lookup-service",
-  #"https://github.com/mojaloop/central-ledger",
-  #"https://github.com/mojaloop/quoting-service",
+  "https://github.com/mojaloop/central-ledger",
+  "https://github.com/mojaloop/quoting-service",
   #"https://github.com/mojaloop/central-event-processor",
   #"https://github.com/mojaloop/forensic-logging-client",
   #"https://github.com/mojaloop/central-end-user-registry",

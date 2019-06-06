@@ -14,6 +14,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source .env
 export CFLAGS=-I/usr/local/opt/openssl/include
 export LDFLAGS=-L/usr/local/opt/openssl/lib
+eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${DIR}/config.toml)
+
 
 mkdir -p ${DIR}/checked_out
 cd ${DIR}/checked_out
