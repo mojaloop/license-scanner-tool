@@ -48,4 +48,18 @@ cleanup:
 	@${scripts_dir}/_cleanup.sh
 
 
+##
+# Post-Processing
+## 
+post-csv-to-excel:
+	#@can we do this: https://www.rondebruin.nl/win/s3/win021.htm ? 
+	@echo 'Not implemented yet'
+	@exit 1
+
+
+post-summarize-csv:
+	@echo 'Not implemented yet'
+	@exit 1
+
+
 .PHONY: run-all run-one cleanup
