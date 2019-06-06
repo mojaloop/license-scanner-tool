@@ -4,3 +4,4 @@ checked_out_2
 lib/toml-to-env
 results
 node_modules
+.env
