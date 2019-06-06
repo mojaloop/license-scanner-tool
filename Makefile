@@ -19,7 +19,7 @@ build:
 # Set Up
 ##
 check-env:
-	@if [ -f "${env_file}" ]; then echo 'Env file found.'; else echo "Error: No env file found. Please fill out before continuing"; cat $(dir)/.env.template > .env; exit 1; fi
+	@if [ -f "${env_file}" ]; then echo 'OK'; else echo "Error: No env file found. Please fill out before continuing"; cat $(dir)/.env.template > .env; exit 1; fi
 
 check-config:
 	@${lib_dir}/toml-to-env/bin/toml-to-env.js ${dir}/config.toml || exit 1
