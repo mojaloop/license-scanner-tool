@@ -54,7 +54,5 @@ for OUTPUT in $(cat ${DIR}/repos | grep "^[^#;]")
 do
   REPO_PATH=`echo ${OUTPUT} | awk -F 'mojaloop/' '{print $2}'`
 
-
-
-  runScanner ${REPO_PATH}
+  runScannerTool ${REPO_PATH}
 done

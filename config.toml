@@ -14,5 +14,4 @@ title = "License Scanner Config"
 # - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
 # - "fossa-json": will export from fossa to a folder of json files
 # - "csv": will export to a list of csv files
-# tool = "fossa-api"
-tool = "csv"
+tool = "fossa-json"
