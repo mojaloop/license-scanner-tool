@@ -6,6 +6,7 @@ export CFLAGS=-I/usr/local/opt/openssl/include
 export LDFLAGS=-L/usr/local/opt/openssl/lib
 
 mkdir -p ${DIR}/checked_out
+mkdir -p ${DIR}/results
 cd ${DIR}/checked_out
 
 function runFossa() {
@@ -14,7 +15,7 @@ function runFossa() {
   echo "Running Fossa for repo: ${REPO_PATH}"
 
   cd ${DIR}/checked_out/${REPO_PATH}
-  fossa analyze
+  fossa analyze -o > ${DIR}/results/${REPO_PATH}.json
 }
 
 
