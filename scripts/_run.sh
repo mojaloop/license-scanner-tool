@@ -20,7 +20,10 @@ function runScannerTool() {
     runFossaJSON $1
     ;;
   lc-csv)
-    runCSV $1
+    runLcCSV $1
+    ;;
+  lc-summary)
+    runLcSummary $1
     ;;
   *)
     echo "unsupported tool: ${tool}"
@@ -47,12 +50,27 @@ function runFossaJSON() {
   fossa test
 }
 
-function runCSV() {
+function runLcCSV() {
   REPO_PATH=$1
 
   echo "Running license-checker for repo: ${REPO_PATH}"
   cd ${ROOT_DIR}/checked_out/${REPO_PATH}
-  ${LIB_DIR}/node_modules/.bin/license-checker . --csv --out ${ROOT_DIR}/results/${REPO_PATH}.csv
+  ${LIB_DIR}/node_modules/.bin/license-checker . \
+    --production \
+    --csv \
+    --out ${ROOT_DIR}/results/${REPO_PATH}.csv
+}
+
+
+function runLcSummary() {
+  REPO_PATH=$1
+
+  echo "Running license-checker for repo: ${REPO_PATH}"
+  cd ${ROOT_DIR}/checked_out/${REPO_PATH}
+  ${LIB_DIR}/node_modules/.bin/license-checker . \
+    --production \
+    --summary \
+    --out ${ROOT_DIR}/results/${REPO_PATH}.txt
 }
 
 
