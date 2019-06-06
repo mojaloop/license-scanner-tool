@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-LIB_DIR=${DIR}/lib
-export CFLAGS=-I/usr/local/opt/openssl/include
-export LDFLAGS=-L/usr/local/opt/openssl/lib
+ROOT_DIR=${DIR}/..
+LIB_DIR=${ROOT_DIR}/lib
 
 source .env
-eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${DIR}/config.toml)
+eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
 
-mkdir -p ${DIR}/checked_out
-cd ${DIR}/checked_out
+mkdir -p ${ROOT_DIR}/checked_out
+cd ${ROOT_DIR}/checked_out
 
 function checkoutRepo() {
   REPO=$1
   echo "Cloning repo: ${REPO}"
-  git clone ${REPO}
+  git clone ${REPO} || echo 'repo has already been cloned'
 }
 
 for OUTPUT in ${repos}

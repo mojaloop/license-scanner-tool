@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LIB_DIR=${ROOT_DIR}/lib
+ROOT_DIR=${DIR}/..
+
 source .env
-LIB_DIR=${DIR}/lib
-eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${DIR}/config.toml)
+eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
 
-cd ${DIR}/checked_out
-mkdir -p ${DIR}/results
-
+cd ${ROOT_DIR}/checked_out
+mkdir -p ${ROOT_DIR}/results
 
 function runScannerTool() {
   #insert switch based on the env
@@ -32,7 +33,7 @@ function runFossaApi() {
   REPO_PATH=$1
   echo "Running fossa-api for repo: ${REPO_PATH}"
 
-  cd ${DIR}/checked_out/${REPO_PATH}
+  cd ${ROOT_DIR}/checked_out/${REPO_PATH}
   fossa analyze 
 }
 
@@ -40,8 +41,8 @@ function runFossaJSON() {
   REPO_PATH=$1
   echo "Running fossa-json for repo: ${REPO_PATH}"
 
-  cd ${DIR}/checked_out/${REPO_PATH}
-  fossa analyze -o > ${DIR}/results/${REPO_PATH}.json
+  cd ${ROOT_DIR}/checked_out/${REPO_PATH}
+  fossa analyze -o > ${ROOT_DIR}/results/${REPO_PATH}.json
 }
 
 function runCSV() {
@@ -50,7 +51,7 @@ function runCSV() {
 }
 
 
-for OUTPUT in $(cat ${DIR}/repos | grep "^[^#;]")
+for OUTPUT in ${repos}
 do
   REPO_PATH=`echo ${OUTPUT} | awk -F 'mojaloop/' '{print $2}'`
 

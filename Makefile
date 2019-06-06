@@ -2,6 +2,7 @@ PROJECT = "LICENSE_SCANNER"
 dir = $(shell pwd)
 env_file = $(dir)/.env
 lib_dir = $(dir)/lib
+scripts_dir = $(dir)/scripts
 
 
 default:
@@ -30,20 +31,19 @@ set-up:
 	@make set-up-git set-up-install
 
 set-up-git:
-	@./_checkout.sh
+	@${scripts_dir}/_checkout.sh
 
 set-up-install:
-	@./_install.sh
-
+	@${scripts_dir}/_install.sh
 
 ##
 # Run Commands
 ##
 run:
-	@./_run.sh
+	@${scripts_dir}/_run.sh
 
 cleanup:
-	@./_cleanup.sh
+	@${scripts_dir}/_cleanup.sh
 
 
 .PHONY: run-all run-one cleanup
