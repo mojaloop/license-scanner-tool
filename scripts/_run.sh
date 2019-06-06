@@ -42,7 +42,8 @@ function runFossaJSON() {
   echo "Running fossa-json for repo: ${REPO_PATH}"
 
   cd ${ROOT_DIR}/checked_out/${REPO_PATH}
-  fossa analyze -o > ${ROOT_DIR}/results/${REPO_PATH}.json
+  # fossa analyze -o > ${ROOT_DIR}/results/${REPO_PATH}.json
+  fossa test
 }
 
 function runCSV() {

@@ -1,7 +1,6 @@
 # License-Scanner
 
-A Tool for scanning the licenses of multiple github projects at once
-
+A tool for scanning licenses of many nodejs projects at once. 
 
 ## Installation
 

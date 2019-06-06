@@ -11,8 +11,8 @@ title = "License Scanner Config"
 # How we should process the licenses
 # options are: 
 # - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
-# - "fossa-json": will export from fossa to a folder of json files
-# - "csv": will export to a list of csv files
+# - "fossa-json": will export from fossa to a folder of json files. This just shows imports heirarchies, and doesn't scan licenses
+# - "csv": will export to a list of csv files using
 tool = "fossa-json"
 
 

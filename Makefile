@@ -16,6 +16,8 @@ build:
 	@cd ${lib_dir} && git clone git@github.com:vessels-tech/toml-to-env.git || echo 'Already cloned'
 	@cd ${lib_dir}/toml-to-env && npm install
 
+	@cd ${lib_dir}/ && npm install
+
 ##
 # Set Up
 ##

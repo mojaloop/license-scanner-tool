@@ -1,0 +1,25 @@
+{
+  "name": "license_scanner",
+  "version": "1.0.0",
+  "description": "A tool for scanning licenses of many nodejs projects at once.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vessels-tech/license-scanner.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vessels-tech/license-scanner/issues"
+  },
+  "homepage": "https://github.com/vessels-tech/license-scanner#readme",
+  "dependencies": {
+    "license-checker": "^25.0.1"
+  }
+}
