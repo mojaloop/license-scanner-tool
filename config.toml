@@ -7,10 +7,11 @@ title = "License Scanner Config"
 # How we should process the licenses
 # options are: 
 # - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
-# - "fossa-json": will export from fossa to a folder of json files. This just shows imports heirarchies, and doesn't scan licenses
+# - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
 # - "lc-csv": will use npm license-checker, and export to a list of csv files
 # - "lc-summary": will use npm license-checker, and export a summary file for each repo
-tool = "lc-csv"
+tool = "fossa-api"
+# tool = "lc-csv"
 
 
 ##
@@ -31,7 +32,6 @@ repos = [
   "https://github.com/mojaloop/central-services-stream",
   "https://github.com/mojaloop/email-notifier",
   "https://github.com/mojaloop/central-settlement",
-  "https://github.com/mojaloop/cross-network",
   "https://github.com/mojaloop/als-oracle-template",
   "https://github.com/mojaloop/interop-switch-js",
   "https://github.com/mojaloop/central-services-shared",
@@ -41,4 +41,14 @@ repos = [
   "https://github.com/mojaloop/central-services-metrics",
   "https://github.com/mojaloop/forensic-logging-sidecar",
   "https://github.com/mojaloop/central-directory",
+  "https://github.com/mojaloop/central-hub",
+  "https://github.com/mojaloop/central-kms",
+  "https://github.com/mojaloop/ilp-service",
+  "https://github.com/mojaloop/dfsp-ussd",
+
+
+  # Java projects - todo: inspect manually
+  # "https://github.com/mojaloop/interop-common",
+  # "https://github.com/mojaloop/interop-mock-central-directory",
+  
 ]

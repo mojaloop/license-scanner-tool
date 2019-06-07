@@ -17,8 +17,7 @@ function setUp() {
   echo "Setting up repo ${REPO_PATH}"
   cd ${ROOT_DIR}/checked_out/${REPO_PATH}
 
-  # TODO: handle other non-npm cases
-  npm install
+  stat package.json > /dev/null 2>&1 && npm install || echo 'not a node project'
   fossa init
 }
 

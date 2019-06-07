@@ -57,6 +57,17 @@ getCsvFiles()
 
     const newSheet = workbook.add(sheetName);
 
+
+    //Sort the sheet by the 2nd column, license
+    const headingRow = sheet.shift();
+    sheet.sort((r1, r2) => {
+      const license1 = r1[1];
+      const license2 = r2[1];
+
+      return license1.localeCompare(license2);
+    });
+    sheet.unshift(headingRow);
+
     //iterate over the sheet and add rows and columns
     sheet.forEach((row, i) => {
       row.forEach((column, j) => {

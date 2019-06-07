@@ -6,7 +6,7 @@ scripts_dir = $(dir)/scripts
 
 
 default:
-	make build set-up run cleanup
+	make build set-up run
 
 ##
 # build tool
