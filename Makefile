@@ -44,6 +44,12 @@ set-up-install:
 # Run Commands
 ##
 run:
+	@if [ ${mode} == "ci" ]; then make run-ci; else run-standalone; fi
+
+run-ci:
+	@echo "running ci"
+
+run-standalone:
 	@${scripts_dir}/_run.sh
 
 cleanup:

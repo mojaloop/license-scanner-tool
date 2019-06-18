@@ -9,6 +9,11 @@ export LDFLAGS=-L/usr/local/opt/openssl/lib
 source .env
 eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
 
+if [ ${mode} == "ci" ]; then
+  echo 'ci mode specified. Skipping install'
+  exit 0
+fi
+
 mkdir -p ${ROOT_DIR}/checked_out
 cd ${ROOT_DIR}/checked_out
 
