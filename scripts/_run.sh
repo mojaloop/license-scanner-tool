@@ -7,8 +7,7 @@ LIB_DIR=${ROOT_DIR}/lib
 source .env
 eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
 
-
- case ${mode} in
+case ${mode} in
   ci)
     ${DIR}/_run_ci.sh
     ;;
@@ -19,4 +18,4 @@ eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
     echo "unsupported mode: ${mode}"
     echo "check your config.toml and try again."
     ;;
-  esac
+esac

@@ -26,7 +26,26 @@ tool = "lc-csv"
 # The path to the repo that will be scanned
 # Ignored when `mode = "standalone"`
 ##
-pathToRepo = ""
+pathToRepo = "/Users/ldaly/developer/vessels/mojaloop-github/ml-api-adapter"
+
+# A list of packages that we have manually audited and are ok with the license
+#e.g.
+# excludeListTest = ["z-schema@3.25.1"]
+#
+# will ignore z-schema@3.25.1 in the license check
+excludeList = [
+  "taffydb@2.6.2",
+]
+
+# A list of licenses that we won't allow in the repo, and will cause
+# a ci run to fail
+failList = [
+  "UNKNOWN",
+  "GPL-1.0",
+  "GPL-2.0",
+  "GPL-3.0",
+]
+
 
 ##
 # The list of repos to scan
