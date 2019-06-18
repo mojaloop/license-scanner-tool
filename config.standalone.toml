@@ -1,0 +1,68 @@
+# License Scanner Config
+
+[environment]
+
+title = "License Scanner Config"
+
+# What mode should we run the scanner in?
+# options:
+# - "standalone": will run the tool against all repos listed in the `repos` list (below)
+# - "ci": will run the tool against the repo defined in `pathToRepo`
+
+mode = 'standalone'
+
+
+# How we should process the licenses
+# options are: 
+# - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
+# - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
+# - "lc-csv": will use npm license-checker, and export to a list of csv files
+# - "lc-summary": will use npm license-checker, and export a summary file for each repo
+tool = "lc-csv"
+
+
+##
+# The path to the repo that will be scanned
+# Ignored when `mode = "standalone"`
+##
+pathToRepo = ""
+
+##
+# The list of repos to scan
+# Lines starting with a # will be ignored
+# Ignored when `mode = "ci"`
+##
+repos = [
+  "https://github.com/mojaloop/account-lookup-service",
+  "https://github.com/mojaloop/central-ledger",
+  "https://github.com/mojaloop/quoting-service",
+  "https://github.com/mojaloop/central-event-processor",
+  "https://github.com/mojaloop/forensic-logging-client",
+  "https://github.com/mojaloop/central-end-user-registry",
+  "https://github.com/mojaloop/ml-api-adapter",
+  "https://github.com/mojaloop/simulator",
+  "https://github.com/mojaloop/mock-pathfinder",
+  "https://github.com/mojaloop/pathfinder-provisioning-client",
+  "https://github.com/mojaloop/central-services-stream",
+  "https://github.com/mojaloop/email-notifier",
+  "https://github.com/mojaloop/central-settlement",
+  "https://github.com/mojaloop/als-oracle-template",
+  "https://github.com/mojaloop/interop-switch-js",
+  "https://github.com/mojaloop/central-services-shared",
+  "https://github.com/mojaloop/central-services-error-handling",
+  "https://github.com/mojaloop/central-services-auth",
+  "https://github.com/mojaloop/central-services-database",
+  "https://github.com/mojaloop/central-services-metrics",
+  "https://github.com/mojaloop/forensic-logging-sidecar",
+  "https://github.com/mojaloop/central-directory",
+  "https://github.com/mojaloop/central-hub",
+  "https://github.com/mojaloop/central-kms",
+  "https://github.com/mojaloop/ilp-service",
+  "https://github.com/mojaloop/dfsp-ussd",
+
+
+  # Java projects - todo: inspect manually
+  # "https://github.com/mojaloop/interop-common",
+  # "https://github.com/mojaloop/interop-mock-central-directory",
+  
+]

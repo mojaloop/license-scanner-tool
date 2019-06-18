@@ -7,6 +7,12 @@ LIB_DIR=${ROOT_DIR}/lib
 source .env
 eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
 
+if [ ${mode} == "ci"]; then
+  echo 'ci mode specified. Skipping checkout'
+  exit 0
+fi
+
+
 mkdir -p ${ROOT_DIR}/checked_out
 cd ${ROOT_DIR}/checked_out
 
