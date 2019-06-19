@@ -38,42 +38,73 @@ Refer to `config.ci.toml` for an example of how to set up this tool for running 
 
 In short:
 
-__1. Clone the project and build__
+__1. Clone the project and set up defaults__
 
 ```bash
-git clone [todo: add link]
-cd license_scanner && make build
+git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
+cd /tmp/license-scanner
+make build default-files
 ```
 
-__2. copy the default settings from config.ci.toml, and make a .env file__
+__2. Set up the license-scanner__
 ```bash
-#from license_scanner dir
-cp config.ci.toml config.toml
-cp .env.template .env
+cd /tmp/license-scanner && make set-up
 ```
 
 __3. edit the config for your project__
+Open the `config.toml` file, and edit the following entries:
 
-[todo: make these configurable with env var?]
-* change `pathToRepo` to point to your repo
+* change `pathToRepo` to point to your repo, or override this with a `pathToRepo` env variable
 * define your packages to ignore in `excludeList`
 * add licenses you won't allow in `failList`
 
 
-__4. Set up the repo__
+__4. Run__
+
 ```bash
-make set-up
+cd /tmp/license-scanner && pathToRepo=/path/to/repo make run
 ```
 
-__5. Run__
+_If this fails, then your project does not pass the license checker_
 
-``bash
-make run
+__5. Access the results in `./results/`__
+
+
+### Example CircleCI YAML:
+
+>This example is taken from the `ml-api-adapter`
+
+```yaml
+defaults_license_checker: &defaults_license_checker |
+    git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
+    cd /tmp/license-scanner
+    make build default-files
+
+...
+audit-licenses:
+  <<: *defaults_working_directory
+  <<: *defaults_docker_node
+  steps:
+    - run:
+        name: Install general dependencies
+        command: *defaults_Dependencies
+    - run:
+        name: Install license_checker
+        command: *defaults_license_checker
+    - checkout
+    - restore_cache:
+        key: dependency-cache-{{ checksum "package.json" }}
+    - run:
+        name: Set up License Checker
+        command: cd /tmp/license-scanner && make set-up
+    - run:
+        name: Run the license-scanner
+        command: cd /tmp/license-scanner && pathToRepo=$CIRCLE_WORKING_DIRECTORY make run
+    - store_artifacts:
+        path: /tmp/license-scanner/results
+        prefix: licenses
+...
 ```
-
-_If this fails, then your project does not pass the license checker
-
-__6. Access the results in `./results/`__
 
 
 
