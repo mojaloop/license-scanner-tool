@@ -26,7 +26,8 @@ tool = "lc-csv"
 # The path to the repo that will be scanned
 # Ignored when `mode = "standalone"`
 ##
-pathToRepo = "/Users/ldaly/developer/vessels/mojaloop-github/ml-api-adapter"
+# pathToRepo = "/Users/ldaly/developer/vessels/mojaloop-github/ml-api-adapter"
+pathToRepo = ""
 
 # A list of packages that we have manually audited and are ok with the license
 #e.g.

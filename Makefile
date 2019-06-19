@@ -49,7 +49,7 @@ set-up-install:
 # Run Commands
 ##
 run:
-	@${scripts_dir}/_run.sh
+	${scripts_dir}/_run.sh
 
 cleanup:
 	@${scripts_dir}/_cleanup.sh
