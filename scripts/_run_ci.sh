@@ -30,14 +30,14 @@ echo "Failing on the following licenses: ${failList}"
 
 function listLicenses() {
   cd ${pathToRepo}
-  license-checker . \
+  ${LIB_DIR}/node_modules/.bin/license-checker . \
     --excludePackages ${excludeList} \
     --production --csv > ${ROOT_DIR}/results/licenses.csv
 }
 
 function checkLicenses() {
   cd ${pathToRepo}
-  license-checker . \
+  ${LIB_DIR}/node_modules/.bin/license-checker  . \
     --excludePackages ${excludeList} \
     --failOn ${failList} \
     --production --csv
