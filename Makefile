@@ -22,7 +22,6 @@ build:
 
 default-files:
 	@echo 'setting up default files'
-	cp config.ci.toml config.toml
 	cp .env.template .env
 
 ##
