@@ -20,6 +20,11 @@ build:
 
 	@cd ${scripts_dir}/ && npm install
 
+default-files:
+	@echo 'setting up default files'
+	cp config.ci.toml config.toml
+	cp .env.template .env
+
 ##
 # Set Up
 ##
