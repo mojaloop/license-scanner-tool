@@ -13,7 +13,6 @@ eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
 eval `cat /tmp/ls_env_override`
 rm -rf ls_env_override
 
-
 case ${mode} in
   docker)
     ${DIR}/_run_docker.sh

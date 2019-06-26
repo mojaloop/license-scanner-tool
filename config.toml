@@ -63,6 +63,7 @@ failList = [
   "GPL-1.0",
   "GPL-2.0",
   "GPL-3.0",
+  "MIT"
 ]
 
 
