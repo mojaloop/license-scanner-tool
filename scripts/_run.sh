@@ -14,9 +14,10 @@ eval `cat /tmp/ls_env_override`
 rm -rf ls_env_override
 
 
-echo "Path to repo is: ${pathToRepo}"
-
 case ${mode} in
+  docker)
+    ${DIR}/_run_docker.sh
+    ;;
   ci)
     ${DIR}/_run_ci.sh
     ;;

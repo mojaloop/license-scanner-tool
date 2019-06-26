@@ -10,7 +10,12 @@ title = "License Scanner Config"
 # options:
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
 # - "ci": will run the tool against the repo defined in `pathToRepo`
-mode = 'ci'
+# - "docker": will run the tool against the docker image defined in `dockerImage`
+#TODO: fix abiguity in this - we can be in CI and docker at the same time...
+# mode = 'ci'
+mode = 'docker'
+
+
 
 ##
 # How we should process the licenses
@@ -24,16 +29,29 @@ tool = "lc-csv"
 
 ##
 # The path to the repo that will be scanned
-# Ignored when `mode = "standalone"`
-##
+# Ignored when `mode != "ci"`
+#
+# e.g.
 # pathToRepo = "/Users/ldaly/developer/vessels/mojaloop-github/ml-api-adapter"
+##
 pathToRepo = ""
 
+
+##
+# The docker image to be scanned
+
+# Ignored when `mode != "docker"`
+##
+dockerImage = 'mojaloop/central-ledger:latest'
+
+
+##
 # A list of packages that we have manually audited and are ok with the license
-#e.g.
+# e.g.
 # excludeListTest = ["z-schema@3.25.1"]
 #
 # will ignore z-schema@3.25.1 in the license check
+##
 excludeList = [
   "taffydb@2.6.2",
 ]
@@ -51,6 +69,6 @@ failList = [
 ##
 # The list of repos to scan
 # Lines starting with a # will be ignored
-# Ignored when `mode = "ci"`
+# Ignored when `mode != "standalone"`
 ##
 repos = [ ]
