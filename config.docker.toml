@@ -15,6 +15,8 @@ title = "License Scanner Config"
 # mode = 'ci'
 mode = 'docker'
 
+
+
 ##
 # How we should process the licenses
 # options are: 
@@ -24,25 +26,23 @@ mode = 'docker'
 # - "lc-summary": will use npm license-checker, and export a summary file for each repo
 tool = "lc-csv"
 
+
 ##
 # The path to the repo that will be scanned
 # Ignored when `mode != "ci"`
 #
 # e.g.
 # pathToRepo = "/Users/ldaly/developer/vessels/mojaloop-github/ml-api-adapter"
-#
-# Override by setting `pathToRepo` env variable
 ##
 pathToRepo = ""
 
 
 ##
 # The docker image to be scanned
-#
+
 # Ignored when `mode != "docker"`
-# Override by setting `dockerImage` env variable
 ##
-dockerImage = ''
+dockerImage = 'mojaloop/central-ledger:latest'
 
 
 ##
@@ -63,6 +63,7 @@ failList = [
   "GPL-1.0",
   "GPL-2.0",
   "GPL-3.0",
+  "MIT"
 ]
 
 
