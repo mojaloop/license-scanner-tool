@@ -12,8 +12,8 @@ title = "License Scanner Config"
 # - "ci": will run the tool against the repo defined in `pathToRepo`
 # - "docker": will run the tool against the docker image defined in `dockerImage`
 #TODO: fix abiguity in this - we can be in CI and docker at the same time...
-# mode = 'ci'
-mode = 'docker'
+mode = 'ci'
+# mode = 'docker'
 
 ##
 # How we should process the licenses

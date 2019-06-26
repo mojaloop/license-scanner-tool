@@ -5,7 +5,9 @@ ROOT_DIR=${DIR}/..
 LIB_DIR=${ROOT_DIR}/lib
 
 # Allow users to override variables with an env variable
-env | grep "pathToRepo" > /tmp/ls_env_override
+env | grep "mode" >> /tmp/ls_env_override
+env | grep "pathToRepo" >> /tmp/ls_env_override
+env | grep "dockerImage" >> /tmp/ls_env_override
 
 source .env
 eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
