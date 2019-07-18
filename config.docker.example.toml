@@ -1,5 +1,5 @@
-# License Scanner Config - CI Version
-# use this config for running license_scanner as part of a CI workflow
+# Example License Scanner Config - Docker Version
+# use this config for running license-scanner against built docker images
 
 [environment]
 

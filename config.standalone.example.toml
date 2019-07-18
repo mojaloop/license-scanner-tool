@@ -1,4 +1,6 @@
-# License Scanner Config
+# Example License Scanner Config - Standalong Version
+# use this config for running license-scanner across multiple repos at once
+# this is useful for running big audits across the entire Mojaloop codebase
 
 [environment]
 

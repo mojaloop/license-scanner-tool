@@ -1,6 +1,6 @@
 # License-Scanner
 
-A tool for scanning licenses of many nodejs projects at once. 
+A tool for scanning the licenses of many Node projects at once. 
 
 ## Installation
 
@@ -22,12 +22,37 @@ make set-up
 # run the analysis
 make run
 
-# if you chose `fossa-json` or `csv`, results will be available in the results dir 
+# if you chose `lc-summary` or `csv`, results will be available in the results dir 
 
 # get your disk space back
 make cleanup
 
 ```
+
+## Updating License Blacklist and Package Whitelist
+
+In order consistently manage the blacklisted licences and whitelisted packages, we use the same `config.toml` file across all Mojaloop projects.
+
+__Adding a new Licence identifier to the blacklist:__
+
+Edit `config.tml`, and add the licence string into the `failList` array:
+```
+failList = [
+  "UNKNOWN",
+  "GPL-1.0",
+  "GPL-2.0",
+  "GPL-3.0",
+  #add your license here
+]
+```
+
+Once your change is in master, all CircleCI builds will fail if that identifier is found.
+
+
+__Adding a new package to the whitelist:__
+
+In addition to maintaining a blacklist of licenses, we whitelist packages that we have manually audited and are happy to include.
+The most common case for this is packages that don't have a license entry in the `package.json` file, which the npm license scan tool lists as `UNKNOWN`.
 
 
 ## Using in CI mode
@@ -35,6 +60,8 @@ make cleanup
 You can also use license_scanner to scan the a repo as part of a CI step, which defines common steps using `make`, and a common default config in `config.toml`
 
 Refer to `config.ci.toml` for an example of how to set up this tool for running as part of a CI process.
+
+>_Note:_ You can also find a complete example of license-scanner in action on the [ml-api-adapter](https://github.com/mojaloop/ml-api-adapter/blob/master/.circleci/config.yml)
 
 In short:
 
@@ -72,6 +99,7 @@ __5. Access the results in `./results/`__
 
 ### Example CircleCI YAML:
 
+//TODO: update
 >This example is taken from the `ml-api-adapter`
 
 ```yaml
@@ -106,5 +134,12 @@ audit-licenses:
 ...
 ```
 
+## Using in Docker mode
 
+Docker mode evaluates the licenses for `node_modules` inside of build docker images. This is used in the Mojaloop as a sanity check to ensure that we haven't accidentally packaged and shipped modules that contain unwanted licenses.
+
+
+Refer to `config.docker.toml` for an example of how to set up this tool for running in docker mode.
+
+>_Note:_ You can also find a complete example of license-scanner in action on the [ml-api-adapter](https://github.com/mojaloop/ml-api-adapter/blob/master/.circleci/config.yml)
 
