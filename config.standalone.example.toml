@@ -6,11 +6,12 @@
 
 title = "License Scanner Config"
 
+##
 # What mode should we run the scanner in?
 # options:
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
-# - "ci": will run the tool against the repo defined in `pathToRepo`
-
+# - "local": will run the tool against the repo defined in `pathToRepo`
+# - "docker": will run the tool against the docker image defined in `dockerImage`
 mode = 'standalone'
 
 
@@ -25,14 +26,27 @@ tool = "lc-csv"
 
 ##
 # The path to the repo that will be scanned
-# Ignored when `mode = "standalone"`
+# Ignored when `mode != "local"`
+#
+# e.g.
+# pathToRepo = "/Users/ldaly/developer/vessels/mojaloop-github/ml-api-adapter"
+#
+# Override by setting `pathToRepo` env variable
 ##
 pathToRepo = ""
 
 ##
+# The docker image to be scanned
+#
+# Ignored when `mode != "docker"`
+# Override by setting `dockerImage` env variable
+##
+dockerImage = ''
+
+##
 # The list of repos to scan
 # Lines starting with a # will be ignored
-# Ignored when `mode = "ci"`
+# Ignored when `mode = "local"`
 ##
 repos = [
   "https://github.com/mojaloop/account-lookup-service",
@@ -61,10 +75,17 @@ repos = [
   "https://github.com/mojaloop/central-kms",
   "https://github.com/mojaloop/ilp-service",
   "https://github.com/mojaloop/dfsp-ussd",
-
-
-  # Java projects - todo: inspect manually
-  # "https://github.com/mojaloop/interop-common",
-  # "https://github.com/mojaloop/interop-mock-central-directory",
-  
 ]
+
+##
+# A list of packages that we have manually audited and are ok with the license
+# e.g.
+# excludeListTest = ["z-schema@3.25.1"]
+#
+# will ignore z-schema@3.25.1 in the license check
+##
+excludeList = [ ]
+
+# A list of licenses that we won't allow in the repo, and will cause
+# the tool to fail
+failList = [ ]

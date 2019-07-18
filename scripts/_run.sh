@@ -19,8 +19,8 @@ case ${mode} in
   docker)
     ${DIR}/_run_docker.sh
     ;;
-  ci)
-    ${DIR}/_run_ci.sh
+  local)
+    ${DIR}/_run_local.sh
     ;;
   standalone)
     ${DIR}/_run_standalone.sh

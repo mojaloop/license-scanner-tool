@@ -3,7 +3,7 @@
 ##
 # _run_docker allows you to run the license scan against node_modules in a docker image
 # for now, it simply runs the docker image, copies the node_modules out, and then runs
-# _run_ci tool
+# _run_local tool
 ##
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -32,8 +32,8 @@ docker run -d \
 docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/node_modules
 
 
-# For now, call _run_ci.sh, with a pathToRepo of /tmp/$containerName/node_modules
-pathToRepo=/tmp/$containerName/node_modules ${DIR}/_run_ci.sh
+# For now, call _run_local.sh, with a pathToRepo of /tmp/$containerName/node_modules
+pathToRepo=/tmp/$containerName/node_modules ${DIR}/_run_local.sh
 result=$?
 
 #cleanup
