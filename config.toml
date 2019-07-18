@@ -8,6 +8,9 @@ title = "License Scanner Config"
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
 # - "local": will run the tool against the repo defined in `pathToRepo`
 # - "docker": will run the tool against the docker image defined in `dockerImage`
+#
+# Override with `mode` env variable
+##
 mode = 'local'
 
 ##
@@ -17,6 +20,7 @@ mode = 'local'
 # - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
 # - "lc-csv": will use npm license-checker, and export to a list of csv files
 # - "lc-summary": will use npm license-checker, and export a summary file for each repo
+##
 tool = "lc-csv"
 
 ##

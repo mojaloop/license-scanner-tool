@@ -18,6 +18,7 @@ In addition to the config defined in `./config.toml`, you can override the confi
 
 | Environment variable | Description | Example values |
 | -------------------- | ----------- | ------ |
+| `mode`               | The mode to run the scanner in. Options are `docker`, `local`, `standalone` | `mode=docker` |
 | `pathToRepo`         | The path of the repo to be scanned. Only respected when `mode = ci` | `pathToRepo=/home/project/ml-api-adapter` |
 | `dockerImage`        | The name of the docker image to be scanned. Only respected when `mode = docker` | `dockerImage=mojaloop/ml-api-adapter:latest` |
 
