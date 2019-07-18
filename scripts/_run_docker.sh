@@ -25,6 +25,8 @@ mkdir -p /tmp/$containerName/node_modules
 docker rm -f $containerName  > /dev/null 2>&1 || echo 'Container already stopped'
 docker pull $dockerImage
 
+echo "Docker image is $dockerImage"
+
 # create a non-running container
 docker create --name $containerName $dockerImage
 
