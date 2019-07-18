@@ -1,3 +1,6 @@
+# Example License Scanner Config - Local Version
+# use this config for running license_scanner against a local node project
+
 [environment]
 
 title = "License Scanner Config"
@@ -8,9 +11,6 @@ title = "License Scanner Config"
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
 # - "local": will run the tool against the repo defined in `pathToRepo`
 # - "docker": will run the tool against the docker image defined in `dockerImage`
-#
-# Override with `mode` env variable
-##
 mode = 'local'
 
 ##
@@ -20,8 +20,8 @@ mode = 'local'
 # - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
 # - "lc-csv": will use npm license-checker, and export to a list of csv files
 # - "lc-summary": will use npm license-checker, and export a summary file for each repo
-##
 tool = "lc-csv"
+
 
 ##
 # The path to the repo that will be scanned
@@ -58,15 +58,8 @@ repos = [ ]
 #
 # will ignore z-schema@3.25.1 in the license check
 ##
-excludeList = [
-  "taffydb@2.6.2",
-]
+excludeList = [ ]
 
 # A list of licenses that we won't allow in the repo, and will cause
 # the tool to fail
-failList = [
-  "UNKNOWN",
-  "GPL-1.0",
-  "GPL-2.0",
-  "GPL-3.0",
-]
+failList = [ ]

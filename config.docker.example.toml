@@ -1,3 +1,6 @@
+# Example License Scanner Config - Docker Version
+# use this config for running license-scanner against built docker images
+
 [environment]
 
 title = "License Scanner Config"
@@ -8,10 +11,7 @@ title = "License Scanner Config"
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
 # - "local": will run the tool against the repo defined in `pathToRepo`
 # - "docker": will run the tool against the docker image defined in `dockerImage`
-#
-# Override with `mode` env variable
-##
-mode = 'local'
+mode = 'docker'
 
 ##
 # How we should process the licenses
@@ -20,7 +20,6 @@ mode = 'local'
 # - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
 # - "lc-csv": will use npm license-checker, and export to a list of csv files
 # - "lc-summary": will use npm license-checker, and export a summary file for each repo
-##
 tool = "lc-csv"
 
 ##
@@ -40,7 +39,7 @@ pathToRepo = ""
 # Ignored when `mode != "docker"`
 # Override by setting `dockerImage` env variable
 ##
-dockerImage = ''
+dockerImage = 'mojaloop/central-ledger:latest'
 
 ##
 # The list of repos to scan
@@ -50,7 +49,6 @@ dockerImage = ''
 ##
 repos = [ ]
 
-
 ##
 # A list of packages that we have manually audited and are ok with the license
 # e.g.
@@ -58,15 +56,8 @@ repos = [ ]
 #
 # will ignore z-schema@3.25.1 in the license check
 ##
-excludeList = [
-  "taffydb@2.6.2",
-]
+excludeList = [ ]
 
 # A list of licenses that we won't allow in the repo, and will cause
 # the tool to fail
-failList = [
-  "UNKNOWN",
-  "GPL-1.0",
-  "GPL-2.0",
-  "GPL-3.0",
-]
+failList = [ ]
