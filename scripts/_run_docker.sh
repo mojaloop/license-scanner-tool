@@ -22,15 +22,16 @@ containerName=$(echo ${dockerImage} | awk -F"/|:" '{print $2}')
 
 mkdir -p /tmp/$containerName/node_modules
 
-docker rm -f $containerName || echo 'Container already stopped'
-
+docker rm -f $containerName  > /dev/null 2>&1 || echo 'Container already stopped'
 docker pull $dockerImage
-docker run -d \
-  --name $containerName \
-  $dockerImage /bin/sh -c 'tail -f /dev/null'
 
+echo "Creating $containerName from $dockerImage"
+
+# create a non-running container
+docker create --name $containerName $dockerImage
+
+# copy out node_modules
 docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/node_modules
-
 
 # For now, call _run_local.sh, with a pathToRepo of /tmp/$containerName/node_modules
 pathToRepo=/tmp/$containerName/node_modules ${DIR}/_run_local.sh
