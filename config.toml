@@ -60,6 +60,7 @@ repos = [ ]
 ##
 excludeList = [
   "taffydb@2.6.2",
+  "buffercursor@0.0.12" # has no license on github or npm
 ]
 
 # A list of licenses that we won't allow in the repo, and will cause
