@@ -9,20 +9,19 @@ default:
 	make build set-up run
 
 ##
-# build tool
+# build the license-scanner tool
 ## 
 build:
 	@mkdir -p ${lib_dir}
 	@cd ${lib_dir} && git clone https://github.com/vessels-tech/toml-to-env.git || echo 'Already cloned'
-	@cd ${lib_dir}/toml-to-env && npm install
-
+	@cd ${lib_dir}/toml-to-env && git fetch && git checkout 69772fd54b05aff36580a739348855f60ee76797 && npm install
 	@cd ${lib_dir}/ && npm install
-
 	@cd ${scripts_dir}/ && npm install
 
 default-files:
 	@echo 'setting up default files'
 	cp .env.template .env
+
 
 ##
 # Set Up
@@ -44,28 +43,37 @@ set-up-git:
 set-up-install:
 	@${scripts_dir}/_install.sh
 
+
 ##
 # Run Commands
 ##
 run:
 	${scripts_dir}/_run.sh
 
-cleanup:
+cleanup-repos:
 	@${scripts_dir}/_cleanup.sh
+
+cleanup-results:
+	rm -rf ${dir}/results/*
+	rm -f post-csv-to-excel
+	rm -f post-summarize-csv
+
 
 
 ##
 # Post-Processing
 ## 
+postprocess: post-csv-to-excel post-summarize-csv
+
 post-csv-to-excel:
 	@cd ${scripts_dir} && node _combine_csv_reports.js
 	@#fix issues with the xlsx package:
 	@mv ${scripts_dir}/.xlsx  $(dir)/results/license-summary.xlsx 
-
+	@touch post-csv-to-excel
 
 post-summarize-csv:
-	@echo 'Not implemented yet'
-	@exit 1
+	@source .env && cd ${scripts_dir} && ./_color_and_summarize.js
+	@touch post-summarize-csv
 
 
 .PHONY: run-all run-one cleanup

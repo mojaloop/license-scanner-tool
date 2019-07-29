@@ -34,32 +34,46 @@ tool = "lc-csv"
 ##
 pathToRepo = ""
 
+
 ##
-# The docker image to be scanned
+# A list of packages that we have manually audited and are ok with.
 #
-# Ignored when `mode != "docker"`
-# Override by setting `dockerImage` env variable
-##
-dockerImage = ''
-
-##
-# The list of repos to scan
-
-# Lines starting with a # will be ignored
-# Ignored when `mode != "standalone"`
-##
-repos = [ ]
-
-
-##
-# A list of packages that we have manually audited and are ok with the license
+# string: Format: "<package>;<reason>"
+#
+#
 # e.g.
-# excludeListTest = ["z-schema@3.25.1"]
+# excludeList = [
+#   "taffydb@2.6.2;Contains MIT license on github, but not listed in package.json"
+# ]
 #
-# will ignore z-schema@3.25.1 in the license check
+# will ignore taffydb@2.6.2 in the license check, and put the "Contains MIT..." reason in the license-summary
 ##
-excludeList = [ ]
+excludeList = [
+  "taffydb@2.6.2;Contains MIT license on github, but not listed in package.json",
+  "buffercursor@0.0.12;No license on github or npm", # has no license on github or npm
+  "cycle@1.0.3;Listed as Public-Domain on npm, but no License file in github",
+  "spdx-exceptions@2.2.0;Requires attribution",
+]
 
-# A list of licenses that we won't allow in the repo, and will cause
-# the tool to fail
-failList = [ ]
+##
+# A list of licenses that we won't allow in the repo, and will cause the tool to fail
+##
+failList = [
+  "GPL-3",
+  "LGPL-3.0",
+  "AGPL-3.0",
+  "MPL-2.0",
+  "EPL-1.0",
+  "Ms-RL",
+  "ODbL",
+  "RPL-1.5",
+  "NGPL",
+  "RSPL-1.0",
+  "OCLC-2.0",
+  "UNKNOWN",
+  "GPL-1.0",
+  "GPL-2.0",
+  "GPL-3.0",
+  "GPL",
+  "Custom"
+]

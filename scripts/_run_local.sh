@@ -20,10 +20,7 @@ fi
 
 mkdir -p ${ROOT_DIR}/results
 
-
-#replace whitespace with ; for the license-checker tool
-excludeList=`echo ${excludeList} | awk '{gsub(/[ \t]/,";");print}'`
-failList=`echo ${failList} | awk '{gsub(/[ \t]/,";");print}'`
+excludeList=`echo ${excludeList} | awk '{MAX=split($0,a,";"); for (x=1; x <= MAX; x = x + 2) {printf a[x]; printf ";";}}'`
 
 echo "Excluding the following packages: ${excludeList}"
 echo "Failing on the following licenses: ${failList}"
@@ -31,7 +28,6 @@ echo "Failing on the following licenses: ${failList}"
 function listLicenses() {
   cd ${pathToRepo}
   ${LIB_DIR}/node_modules/.bin/license-checker . \
-    --excludePackages ${excludeList} \
     --production --csv > ${ROOT_DIR}/results/licenses.csv
 }
 

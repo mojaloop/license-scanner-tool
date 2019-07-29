@@ -1,7 +1,8 @@
-
+#!/usr/bin/env node
 
 const fs = require('fs');
 const Workbook = require('xlsx-workbook').Workbook;
+const xlsx = require('xlsx-style') //this is a fork, might cause problems
 var CsvReadableStream = require('csv-reader');
 
 const resultsDir = `../results/`;
@@ -42,6 +43,17 @@ const readAndParseFile = (path) => {
   });
 }
 
+/**
+ * First pass: 
+ * - iterate through each sheet, and highlight disallowed licenses
+ * - add a 
+ */
+const highlightBadLicenses = (workbook) => {
+
+
+
+}
+
 let csvFiles;
 
 getCsvFiles()
@@ -53,7 +65,7 @@ getCsvFiles()
 .then(csvRows => {
   csvRows.forEach((sheet, idx) => {
     const sheetName = csvFiles[idx].replace(".csv", "");
-    console.log("sheet name is", sheetName);
+    console.log("Processing sheet:", sheetName);
 
     const newSheet = workbook.add(sheetName);
 
