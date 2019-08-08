@@ -53,7 +53,6 @@ repos = [
   "https://github.com/mojaloop/central-ledger",
   "https://github.com/mojaloop/quoting-service",
   "https://github.com/mojaloop/central-event-processor",
-  "https://github.com/mojaloop/central-end-user-registry",
   "https://github.com/mojaloop/ml-api-adapter",
   "https://github.com/mojaloop/simulator",
   "https://github.com/mojaloop/mock-pathfinder",
@@ -68,7 +67,6 @@ repos = [
   "https://github.com/mojaloop/central-services-database",
   "https://github.com/mojaloop/central-services-metrics",
   "https://github.com/mojaloop/forensic-logging-sidecar",
-  "https://github.com/mojaloop/central-hub",
   "https://github.com/mojaloop/central-kms",
 ]
 

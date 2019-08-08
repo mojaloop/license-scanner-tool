@@ -1,6 +1,6 @@
 {
-  "name": "license_scanner",
-  "version": "7.2.0",
+  "name": "@mojaloop/license-scanner",
+  "version": "7.3.0",
   "description": "A tool for scanning licenses of many nodejs projects at once.",
   "main": "index.js",
   "directories": {
@@ -14,7 +14,7 @@
     "url": "git+https://github.com/vessels-tech/license-scanner.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/mojaloop/license-scanner/issues"
   },
