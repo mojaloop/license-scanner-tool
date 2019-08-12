@@ -73,10 +73,11 @@ function runLcSummary() {
     --out ${ROOT_DIR}/results/${REPO_PATH}.txt
 }
 
+#change delimiter from `;` to ` ` to allow for simple iteration
+repos=`echo ${repos} | awk '{gsub(/[;]/," ");print}'`
 
 for OUTPUT in ${repos}
 do
   REPO_PATH=`echo ${OUTPUT} | awk -F 'mojaloop/' '{print $2}'`
-
   runScannerTool ${REPO_PATH}
 done

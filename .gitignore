@@ -5,3 +5,7 @@ lib/toml-to-env
 results*
 node_modules
 .env
+
+
+post-csv-to-excel
+post-summarize-csv

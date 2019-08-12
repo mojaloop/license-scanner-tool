@@ -1,3 +1,7 @@
+# Example License Scanner Config - Standalong Version
+# use this config for running license-scanner across multiple repos at once
+# this is useful for running big audits across the entire Mojaloop codebase
+
 [environment]
 
 title = "License Scanner Config"
@@ -8,20 +12,17 @@ title = "License Scanner Config"
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
 # - "local": will run the tool against the repo defined in `pathToRepo`
 # - "docker": will run the tool against the docker image defined in `dockerImage`
-#
-# Override with `mode` env variable
-##
 mode = 'local'
 
-##
+
 # How we should process the licenses
 # options are: 
 # - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
 # - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
 # - "lc-csv": will use npm license-checker, and export to a list of csv files
 # - "lc-summary": will use npm license-checker, and export a summary file for each repo
-##
 tool = "lc-csv"
+
 
 ##
 # The path to the repo that will be scanned
@@ -40,34 +41,75 @@ pathToRepo = ""
 # Ignored when `mode != "docker"`
 # Override by setting `dockerImage` env variable
 ##
-dockerImage = ''
+dockerImage = 'mojaloop/central-ledger:latest'
 
 ##
 # The list of repos to scan
-
 # Lines starting with a # will be ignored
 # Ignored when `mode != "standalone"`
 ##
-repos = [ ]
-
-
-##
-# A list of packages that we have manually audited and are ok with the license
-# e.g.
-# excludeListTest = ["z-schema@3.25.1"]
-#
-# will ignore z-schema@3.25.1 in the license check
-##
-excludeList = [
-  "taffydb@2.6.2",
-  "buffercursor@0.0.12" # has no license on github or npm
+repos = [
+  "https://github.com/mojaloop/account-lookup-service",
+  "https://github.com/mojaloop/central-ledger",
+  "https://github.com/mojaloop/quoting-service",
+  "https://github.com/mojaloop/central-event-processor",
+  "https://github.com/mojaloop/ml-api-adapter",
+  "https://github.com/mojaloop/simulator",
+  "https://github.com/mojaloop/mock-pathfinder",
+  "https://github.com/mojaloop/pathfinder-provisioning-client",
+  "https://github.com/mojaloop/central-services-stream",
+  "https://github.com/mojaloop/email-notifier",
+  "https://github.com/mojaloop/central-settlement",
+  "https://github.com/mojaloop/interop-switch-js",
+  "https://github.com/mojaloop/central-services-shared",
+  "https://github.com/mojaloop/central-services-error-handling",
+  "https://github.com/mojaloop/central-services-auth",
+  "https://github.com/mojaloop/central-services-database",
+  "https://github.com/mojaloop/central-services-metrics",
+  "https://github.com/mojaloop/forensic-logging-sidecar",
+  "https://github.com/mojaloop/central-kms",
 ]
 
-# A list of licenses that we won't allow in the repo, and will cause
-# the tool to fail
+##
+# A list of packages that we have manually audited and are ok with.
+#
+# string: Format: "<package>;<reason>"
+#
+#
+# e.g.
+# excludeList = [
+#   "taffydb@2.6.2;Contains MIT license on github, but not listed in package.json"
+# ]
+#
+# will ignore taffydb@2.6.2 in the license check, and put the "Contains MIT..." reason in the license-summary
+##
+excludeList = [
+  "taffydb@2.6.2;Contains MIT license on github, but not listed in package.json",
+  "buffercursor@0.0.12;No license on github or npm", # has no license on github or npm
+  "cycle@1.0.3;Listed as Public-Domain on npm, but no License file in github",
+  "spdx-exceptions@2.2.0;Requires attribution",
+  "xmldom@0.1.27;Allows either MIT or LGPL License"
+]
+
+##
+# A list of licenses that we won't allow in the repo, and will cause the tool to fail
+##
 failList = [
+  "GPL-3",
+  "LGPL-3.0",
+  "AGPL-3.0",
+  "MPL-2.0",
+  "EPL-1.0",
+  "Ms-RL",
+  "ODbL",
+  "RPL-1.5",
+  "NGPL",
+  "RSPL-1.0",
+  "OCLC-2.0",
   "UNKNOWN",
   "GPL-1.0",
   "GPL-2.0",
   "GPL-3.0",
+  "GPL",
+  "Custom"
 ]
