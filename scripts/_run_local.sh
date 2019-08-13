@@ -3,18 +3,20 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR=${DIR}/..
 LIB_DIR=${ROOT_DIR}/lib
+source ${DIR}/colors.sh
 
-# Allow users to override variables with an env variable
-env | grep "pathToRepo" > /tmp/ls_env_override
-
+##
+# Set up the environment: 
+# 1. the common .env
+# 2. env from config.toml
+# 3. Any env overrides found
+##
 source .env
 eval $(${LIB_DIR}/toml-to-env/bin/toml-to-env.js ${ROOT_DIR}/config.toml)
-
-eval `cat /tmp/ls_env_override`
-rm -rf ls_env_override
+source .env_override
 
 if [ ! -d "${pathToRepo}" ]; then 
-  echo "cannot find pathToRepo: ${pathToRepo}. Please check and try again"
+  logErr "cannot find pathToRepo: ${pathToRepo}. Please check and try again"
   exit 1
 fi
 

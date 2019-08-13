@@ -1,11 +1,17 @@
 checked_out
-.env
+
 checked_out_2
 lib/toml-to-env
 results*
 node_modules
 .env
 
+# Private Env vars
+.env
+.env_override
 
+
+#make artifacts
+build
 post-csv-to-excel
 post-summarize-csv

@@ -20,7 +20,6 @@ mode = 'local'
 # - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
 # - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
 # - "lc-csv": will use npm license-checker, and export to a list of csv files
-# - "lc-summary": will use npm license-checker, and export a summary file for each repo
 tool = "lc-csv"
 
 
@@ -36,12 +35,26 @@ tool = "lc-csv"
 pathToRepo = ""
 
 ##
-# The docker image to be scanned
+# The docker image to be scanned.
+# DEPRECATED: use `dockerImages` instead
 #
 # Ignored when `mode != "docker"`
 # Override by setting `dockerImage` env variable
 ##
 dockerImage = 'mojaloop/central-ledger:latest'
+
+
+##
+# A list of docker images to scan
+#
+# Ignored when `mode != "docker"`
+# Override by setting `dockerImages` env variable
+##
+dockerImages = [
+  "mojaloop/ml-api-adapter:latest",
+  "mojaloop/central-ledger:latest"
+]
+
 
 ##
 # The list of repos to scan
