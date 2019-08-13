@@ -1,6 +1,6 @@
 {
   "name": "@mojaloop/license-scanner",
-  "version": "7.3.0",
+  "version": "7.3.1",
   "description": "A tool for scanning licenses of many nodejs projects at once.",
   "main": "index.js",
   "directories": {

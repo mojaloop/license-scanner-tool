@@ -23,12 +23,25 @@ mode = 'docker'
 tool = "lc-csv"
 
 ##
-# The docker image to be scanned
+# The docker image to be scanned.
+# DEPRECATED: use `dockerImages` instead
 #
 # Ignored when `mode != "docker"`
 # Override by setting `dockerImage` env variable
 ##
 dockerImage = 'mojaloop/central-ledger:latest'
+
+
+##
+# A list of docker images to scan
+#
+# Ignored when `mode != "docker"`
+# Override by setting `dockerImages` env variable
+##
+dockerImages = [
+  "mojaloop/ml-api-adapter:latest",
+  "mojaloop/central-ledger:latest"
+]
 
 ##
 # A list of packages that we have manually audited and are ok with.

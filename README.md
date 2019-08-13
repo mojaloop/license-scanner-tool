@@ -20,32 +20,33 @@ In addition to the config defined in `./config.toml`, you can override the confi
 | -------------------- | ----------- | ------ |
 | `mode`               | The mode to run the scanner in. Options are `docker`, `local`, `standalone` | `mode=docker` |
 | `pathToRepo`         | The path of the repo to be scanned. Only respected when `mode = ci` | `pathToRepo=/home/project/ml-api-adapter` |
-| `dockerImage`        | The name of the docker image to be scanned. Only respected when `mode = docker` | `dockerImage=mojaloop/ml-api-adapter:latest` |
+| `dockerImage`        | **DEPRECATED** use `dockerImages` instead. The name of the docker image to be scanned. Only respected when `mode = docker` | `dockerImage=mojaloop/ml-api-adapter:latest` |
+| `dockerImages`       | A space separated list of dockerImages to scan. Only respected when `mode = docker` | `dockerImage="mojaloop/ml-api-adapter:latest mojaloop/central-ledger:latest"`
 
 
 ## Running
 
 ```bash
-# clone all of the repos defined in `config.toml`
-make set-up
+# install the tool and clone all of the repos defined in `config.toml`
+make build
 
 # run the analysis
 make run
 
-# if you chose `lc-summary` or `csv`, results will be available in the results dir 
+# export an .xlsx summary file
+make postprocess
 
-# get your disk space back
+# uninstall the tool, remove the repos and results
 make cleanup
-
 ```
 
 ## Updating License Blacklist and Package Whitelist
 
-In order consistently manage the blacklisted licences and whitelisted packages, we use the same `config.toml` file across all Mojaloop projects.
+In order consistently manage the blacklisted licenses and whitelisted packages, we use the same `config.toml` file across all Mojaloop projects.
 
-__Adding a new Licence identifier to the blacklist:__
+__Adding a new License identifier to the blacklist:__
 
-Edit `config.tml`, and add the licence string into the `failList` array:
+Edit `config.tml`, and add the license string into the `failList` array:
 ```
 failList = [
   "UNKNOWN",
@@ -109,7 +110,6 @@ __5. Access the results in `./results/`__
 
 ### Example CircleCI YAML:
 
-//TODO: update
 >This example is taken from the `ml-api-adapter`
 
 ```yaml
@@ -149,7 +149,14 @@ audit-licenses:
 Docker mode evaluates the licenses for `node_modules` inside of build docker images. This is used in the Mojaloop as a sanity check to ensure that we haven't accidentally packaged and shipped modules that contain unwanted licenses.
 
 
-Refer to `config.docker.toml` for an example of how to set up this tool for running in docker mode.
+Refer to `config.docker.example.toml` for an example of how to set up this tool for running in docker mode. Alternatively, you can run the tool as follows:
+```
+export mode=docker
+export dockerImages="<space separated list of docker images>
+make run
+```
 
 >_Note:_ You can also find a complete example of license-scanner in action on the [ml-api-adapter](https://github.com/mojaloop/ml-api-adapter/blob/master/.circleci/config.yml)
+
+
 
