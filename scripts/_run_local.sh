@@ -34,11 +34,17 @@ function listLicenses() {
 }
 
 function checkLicenses() {
+  output=/tmp/license_output
+
   cd ${pathToRepo}
   ${LIB_DIR}/node_modules/.bin/license-checker  . \
     --excludePackages ${excludeList} \
     --failOn ${failList} \
-    --production --csv
+    --production --csv > ${output}
+
+  if [ "${LOG_LEVEL}" == "info" ]; then
+    cat ${output}
+  fi
 }
 
 listLicenses
