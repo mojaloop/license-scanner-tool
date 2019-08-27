@@ -78,6 +78,13 @@ function processDockerImage() {
   docker rm -f $containerName  > /dev/null 2>&1 || logSubStep 'Container already stopped'
   docker pull $stepDockerImage
 
+  # Make sure the container exists, and we can pull it
+  dockerPullResult=$?
+  if [ ${dockerPullResult} -ne 0 ]; then
+    logErr "failed to pull docker image: ${stepDockerImage}. Aborting."
+    exit ${dockerPullResult}
+  fi
+
   logSubStep "Creating $containerName from $stepDockerImage"
 
   # create a non-running container
