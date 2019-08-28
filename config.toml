@@ -101,7 +101,8 @@ excludeList = [
   "buffercursor@0.0.12;No license on github or npm", # has no license on github or npm
   "cycle@1.0.3;Listed as Public-Domain on npm, but no License file in github",
   "spdx-exceptions@2.2.0;Requires attribution",
-  "xmldom@0.1.27;Allows either MIT or LGPL License"
+  "xmldom@0.1.19;Allows either MIT or LGPL License",
+  "xmldom@0.1.27;Allows either MIT or LGPL License",
 ]
 
 ##
