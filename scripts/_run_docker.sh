@@ -78,11 +78,10 @@ function processDockerImage() {
   docker rm -f $containerName  > /dev/null 2>&1 || logSubStep 'Container already stopped'
   docker pull $stepDockerImage
 
-  # Make sure the container exists, and we can pull it
+  # Check if the image exists, and we can pull it
   dockerPullResult=$?
   if [ ${dockerPullResult} -ne 0 ]; then
-    logErr "failed to pull docker image: ${stepDockerImage}. Aborting."
-    exit ${dockerPullResult}
+    logWarn "failed to pull docker image: ${stepDockerImage}. This may not be fatal"
   fi
 
   logSubStep "Creating $containerName from $stepDockerImage"
@@ -90,19 +89,28 @@ function processDockerImage() {
   # create a non-running container
   docker create --name $containerName $stepDockerImage
 
-  # copy out node_modules
-  # Hacky workaround for inconsistent naming of mojaloop simulator: TODO: remote this once ticket is closed
-  # Open Ticket: https://github.com/mojaloop/project/issues/929
-  if [ "$containerName" == "simulator" ]; then
-    logWarn "mojaloop/simulator file path is inconsistent - using temporary hacky workaround to get node_modules"
-    docker cp $containerName:/opt/simulators/node_modules /tmp/$containerName/node_modules
-  else 
-    docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/node_modules
+  dockerCreateResult=$?
+  if [ ${dockerCreateResult} -ne 0 ]; then
+    logErr "failed to create docker image: ${stepDockerImage}. Aborting"
+    exit ${dockerCreateResult}
+  fi
+
+  # copy out node_modules - look in project root as well as .<project>/src and /src
+  docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+  docker cp $containerName:/opt/$containerName/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+  docker cp $containerName:/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+
+  # check that the copy worked - this seems especially brittle
+  if [ "$(ls -A /tmp/${containerName}/node_modules)" ]; then
+    logSubStep "Copied node_modules successfully"
+  else
+    logErr "Fatal Error. Failed to copy node modules out of docker image: ${stepDockerImage}. Aborting"
+    exit 1
   fi
 
   # run the license scan
-  listLicenses ${containerName} /tmp/$containerName/node_modules
-  checkLicenses ${containerName} /tmp/$containerName/node_modules
+  listLicenses ${containerName} /tmp/$containerName
+  checkLicenses ${containerName} /tmp/$containerName
   result=$?
 
   #cleanup
