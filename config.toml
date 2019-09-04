@@ -50,10 +50,7 @@ dockerImage = 'mojaloop/central-ledger:latest'
 # Ignored when `mode != "docker"`
 # Override by setting `dockerImages` env variable
 ##
-dockerImages = [
-  "mojaloop/ml-api-adapter:latest",
-  "mojaloop/central-ledger:latest"
-]
+dockerImages = []
 
 
 ##
