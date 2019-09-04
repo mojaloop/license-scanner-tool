@@ -108,11 +108,9 @@ function processDockerImage() {
     exit 1
   fi
 
-  # exit 1
-
   # run the license scan
-  listLicenses ${containerName} /tmp/$containerName/node_modules
-  checkLicenses ${containerName} /tmp/$containerName/node_modules
+  listLicenses ${containerName} /tmp/$containerName
+  checkLicenses ${containerName} /tmp/$containerName
   result=$?
 
   #cleanup
