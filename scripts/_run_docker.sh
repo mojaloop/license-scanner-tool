@@ -96,9 +96,19 @@ function processDockerImage() {
   fi
 
   # copy out node_modules - look in project root as well as .<project>/src and /src
-  docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/node_modules
-  docker cp $containerName:/opt/$containerName/src/node_modules /tmp/$containerName/node_modules
-  docker cp $containerName:/src/node_modules /tmp/$containerName/node_modules
+  docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+  docker cp $containerName:/opt/$containerName/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+  docker cp $containerName:/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+
+  # check that the copy worked - this seems especially brittle
+  if [ "$(ls -A /tmp/${containerName}/node_modules)" ]; then
+    logSubStep "Copied node_modules successfully"
+  else
+    logErr "Fatal Error. Failed to copy node modules out of docker image: ${stepDockerImage}. Aborting"
+    exit 1
+  fi
+
+  # exit 1
 
   # run the license scan
   listLicenses ${containerName} /tmp/$containerName/node_modules
