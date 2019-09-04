@@ -95,8 +95,10 @@ function processDockerImage() {
     exit ${dockerCreateResult}
   fi
 
-  # copy out node_modules
+  # copy out node_modules - look in project root as well as .<project>/src and /src
   docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/node_modules
+  docker cp $containerName:/opt/$containerName/src/node_modules /tmp/$containerName/node_modules
+  docker cp $containerName:/src/node_modules /tmp/$containerName/node_modules
 
   # run the license scan
   listLicenses ${containerName} /tmp/$containerName/node_modules
