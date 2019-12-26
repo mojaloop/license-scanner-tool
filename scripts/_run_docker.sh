@@ -129,7 +129,9 @@ dockerImages=`echo ${dockerImages} | awk '{gsub(/[;]/," ");print}'`
 # iterate through docker images
 for OUTPUT in ${dockerImages}
 do
-  processDockerImage ${OUTPUT}
+  if [ ${OUTPUT} -ne "finance-portal-ui" ]; then
+    processDockerImage ${OUTPUT}
+  fi
 done
 
 exit 0
