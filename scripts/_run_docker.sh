@@ -131,6 +131,8 @@ for OUTPUT in ${dockerImages}
 do
   if [ ${OUTPUT} -ne "finance-portal-ui" ]; then
     processDockerImage ${OUTPUT}
+  else
+    logStep "Skiping validation for ${OUTPUT}"
   fi
 done
 
