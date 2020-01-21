@@ -40,7 +40,7 @@ fi
 
 excludeList=`echo ${excludeList} | awk '{MAX=split($0,a,";"); for (x=1; x <= MAX; x = x + 2) {printf a[x]; printf ";";}}'`
 echo "Excluding the following packages: ${excludeList}"
-echo "Failing on the following licenses: ${failList}"
+echo "Allowing only the following licenses: ${allowedList}"
 
 function listLicenses() {
   containerName=$1
@@ -58,14 +58,18 @@ function checkLicenses() {
   nodeDirectory=$2
   cd ${nodeDirectory}
 
+  # TODO: deal with spaces better in onlyAllow list...
   ${LIB_DIR}/node_modules/.bin/license-checker  . \
-    --excludePackages ${excludeList} \
-    --failOn ${failList} \
+    --excludePackages "${excludeList}" \
+    --onlyAllow "${allowedList}" \
     --production --csv > ${output}
+  result=$?
 
   if [ "${LOG_LEVEL}" == "info" ]; then
     cat ${output}
   fi
+
+  return ${result}
 }
 
 function processDockerImage() {
@@ -125,14 +129,22 @@ function processDockerImage() {
 
 # change delimiter from `;` to ` ` to allow for simple iteration
 dockerImages=`echo ${dockerImages} | awk '{gsub(/[;]/," ");print}'`
+skipDockerImages=`echo ${skipDockerImages} | awk '{gsub(/[;]/," ");print}'`
 
-# iterate through docker images
+# iterate through docker images and skipDockerImages
 for OUTPUT in ${dockerImages}
 do
-  if [ ${OUTPUT} -ne "finance-portal-ui" ]; then
+  shouldSkip=0
+  for SKIP_IMAGE in ${skipDockerImages}
+  do
+    if [[ ${OUTPUT} == *"${SKIP_IMAGE}"* ]]; then
+      logStep "Skipping validation for ${OUTPUT}"
+      shouldSkip=1
+    fi
+  done
+
+  if [[ shouldSkip -eq 0 ]]; then
     processDockerImage ${OUTPUT}
-  else
-    logStep "Skiping validation for ${OUTPUT}"
   fi
 done
 
