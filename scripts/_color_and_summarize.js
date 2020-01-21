@@ -6,7 +6,6 @@ const fuzz = require('fuzzball');
 const Const = require('./Constants')
 const { allowedList, excludeList} = require('./Config')
 
-
 const getCellForSheet = (sheet, column, row) => {
   const add = { c: column, r: row };
   const ref = XLSX.utils.encode_cell(add);
