@@ -12,7 +12,7 @@ title = "License Scanner Config"
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
 # - "local": will run the tool against the repo defined in `pathToRepo`
 # - "docker": will run the tool against the docker images defined in `dockerImages`
-mode = 'docker'
+mode = 'local'
 
 
 # How we should process the licenses
