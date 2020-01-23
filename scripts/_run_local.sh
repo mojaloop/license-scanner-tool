@@ -38,8 +38,8 @@ function checkLicenses() {
 
   cd ${pathToRepo}
   ${LIB_DIR}/node_modules/.bin/license-checker  . \
-    --excludePackages ${excludeList} \
-    --onlyAllow ${allowedList} \
+    --excludePackages "${excludeList}" \
+    --onlyAllow "${allowedList}" \
     --production --csv > ${output}
   result=$?
 
