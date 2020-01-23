@@ -41,10 +41,13 @@ function checkLicenses() {
     --excludePackages ${excludeList} \
     --onlyAllow ${allowedList} \
     --production --csv > ${output}
+  result=$?
 
   if [ "${LOG_LEVEL}" == "info" ]; then
     cat ${output}
   fi
+
+  exit ${result}
 }
 
 listLicenses
