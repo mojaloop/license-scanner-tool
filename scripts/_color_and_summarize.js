@@ -4,8 +4,7 @@ const XLSX = require('xlsx-style')
 const fuzz = require('fuzzball');
 
 const Const = require('./Constants')
-const { failList, excludeList} = require('./Config')
-
+const { allowedList, excludeList} = require('./Config')
 
 const getCellForSheet = (sheet, column, row) => {
   const add = { c: column, r: row };
@@ -35,14 +34,14 @@ const fuzzyContains = (stringList, string, threshold = 95) => {
       return idx;
     }
 
-    return curr
+    return acc
   }, -1)
 }
 
 
 /**
  * @function getErrorRows
- * 
+ *
  * @description Gets the rows that contain errors in the sheet
  * 
  * @param {XLSX.Sheet} sheet 
@@ -58,28 +57,33 @@ const getErrorRows = (sheet) => {
       continue
     }
 
-    const fuzzyIndex = fuzzyContains(failList.map(r => r.license), licenseString, Const.LICENSE_STRING_MATCH_THRESHOLD)
+    const fuzzyIndex = fuzzyContains(allowedList, licenseString, Const.LICENSE_STRING_MATCH_THRESHOLD)
     if (fuzzyIndex > -1) {
-      const package = getCellForSheet(sheet, Const.COLUMN_PACKAGE, row)
-      const github = getCellForSheet(sheet, Const.COLUMN_GITHUB, row)
-      
-      //Whitelist package
-      const warningRowIdx = excludeList.map(r => r.package).indexOf(package);
-      if (warningRowIdx > -1) {
-        continue
-      }
-
-      const error = failList[fuzzyIndex] 
-      errorRowNumbers.push({
-        row, 
-        ctx: { 
-          ...error,
-          license: licenseString,
-          package,
-          github,
-        }
-      })
+      continue
     }
+    const package = getCellForSheet(sheet, Const.COLUMN_PACKAGE, row)
+    const github = getCellForSheet(sheet, Const.COLUMN_GITHUB, row)
+    
+    //Whitelist package
+    const warningRowIdx = excludeList.map(r => r.package).indexOf(package);
+    if (warningRowIdx > -1) {
+      continue
+    }
+
+    const error = {
+      license: allowedList[fuzzyIndex],
+      reason: 'Disallowed license'
+    }
+    
+    errorRowNumbers.push({
+      row, 
+      ctx: { 
+        ...error,
+        license: licenseString,
+        package,
+        github,
+      }
+    })
   }
 
   return errorRowNumbers

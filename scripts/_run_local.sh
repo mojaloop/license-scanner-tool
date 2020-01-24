@@ -25,7 +25,7 @@ mkdir -p ${ROOT_DIR}/results
 excludeList=`echo ${excludeList} | awk '{MAX=split($0,a,";"); for (x=1; x <= MAX; x = x + 2) {printf a[x]; printf ";";}}'`
 
 echo "Excluding the following packages: ${excludeList}"
-echo "Failing on the following licenses: ${failList}"
+echo "Allowing only the following licenses: ${allowedList}"
 
 function listLicenses() {
   cd ${pathToRepo}
@@ -38,13 +38,16 @@ function checkLicenses() {
 
   cd ${pathToRepo}
   ${LIB_DIR}/node_modules/.bin/license-checker  . \
-    --excludePackages ${excludeList} \
-    --failOn ${failList} \
+    --excludePackages "${excludeList}" \
+    --onlyAllow "${allowedList}" \
     --production --csv > ${output}
+  result=$?
 
   if [ "${LOG_LEVEL}" == "info" ]; then
     cat ${output}
   fi
+
+  exit ${result}
 }
 
 listLicenses

@@ -11,7 +11,7 @@ title = "License Scanner Config"
 # options:
 # - "standalone": will run the tool against all repos listed in the `repos` list (below)
 # - "local": will run the tool against the repo defined in `pathToRepo`
-# - "docker": will run the tool against the docker image defined in `dockerImage`
+# - "docker": will run the tool against the docker images defined in `dockerImages`
 mode = 'local'
 
 
@@ -41,7 +41,7 @@ pathToRepo = ""
 # Ignored when `mode != "docker"`
 # Override by setting `dockerImage` env variable
 ##
-dockerImage = 'mojaloop/central-ledger:latest'
+dockerImage = ''
 
 
 ##
@@ -50,7 +50,40 @@ dockerImage = 'mojaloop/central-ledger:latest'
 # Ignored when `mode != "docker"`
 # Override by setting `dockerImages` env variable
 ##
-dockerImages = []
+dockerImages = [
+  "mojaloop/account-lookup-service:v8.7.0",
+  "mojaloop/als-oracle-pathfinder:v8.7.1",
+  "mojaloop/bulk-api-adapter:v8.7.0-snapshot",
+  "mojaloop/central-end-user-registry:v2.4",
+  "mojaloop/central-event-processor:v8.6.0",
+  "mojaloop/central-event-processor:v8.7.0",
+  "mojaloop/central-ledger:v8.7.1",
+  "mojaloop/central-settlement:v8.6.0",
+  "mojaloop/email-notifier:v8.7.0",
+  "mojaloop/event-sidecar:v8.7.0",
+  "mojaloop/event-sidecar:v8.7.1",
+  "mojaloop/event-stream-processor:v8.7.2-snapshot",
+  "mojaloop/finance-portal-backend-service:v0.0.1",
+  "mojaloop/finance-portal-backend-service:v0.0.5",
+  "mojaloop/finance-portal-ui:v0.0.3",
+  "mojaloop/ml-api-adapter:v8.7.2",
+  "mojaloop/operator-settlement:latest",
+  "mojaloop/quoting-service:v8.7.0-snapshot",
+  "mojaloop/settlement-management:latest",
+  "mojaloop/simulator:v8.7.1",
+  "mojaloop/transaction-requests-service:v8.7.0"
+]
+
+##
+# A list of docker images (or image name substrings) to skip scanning
+#
+# Ignored when `mode != "docker"`
+# This is useful when scanning a list of images in helm we don't know
+# ahead of time
+##
+skipDockerImages = [
+  "mojaloop/finance-portal-ui"
+]
 
 
 ##
@@ -101,24 +134,31 @@ excludeList = [
 ]
 
 ##
-# A list of licenses that we won't allow in the repo, and will cause the tool to fail
+# A list of licenses strings that we allow.
 ##
-failList = [
-  "GPL-3",
-  "LGPL-3.0",
-  "AGPL-3.0",
-  "MPL-2.0",
-  "EPL-1.0",
-  "Ms-RL",
-  "ODbL",
-  "RPL-1.5",
-  "NGPL",
-  "RSPL-1.0",
-  "OCLC-2.0",
-  "UNKNOWN",
-  "GPL-1.0",
-  "GPL-2.0",
-  "GPL-3.0",
-  "GPL",
-  "Custom"
+allowedList = [
+  "AFLv2.1",
+  "Apache License, Version 2.0",
+  "Apache*",
+  "Apache-2.0",
+  "BSD",
+  "BSD*",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "CC-BY-3.0",
+  "CC0-1.0",
+  "ISC",
+  "MIT",
+  "MIT*",
+  "Public Domain",
+  "UNLICENSED",
+  "Unlicense",
+  "Unlicensed",
+  "WTFPL",
+  "(BSD-2-Clause OR MIT OR Apache-2.0)",
+  "(MIT OR Apache-2.0)",
+  "(MIT OR CC0-1.0)",
+  "(Unlicense OR Apache-2.0)",
+  "WTFPL OR ISC",
+  "(WTFPL OR MIT)",
 ]

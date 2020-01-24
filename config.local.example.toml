@@ -56,24 +56,25 @@ excludeList = [
 ]
 
 ##
-# A list of licenses that we won't allow in the repo, and will cause the tool to fail
+# A list of licenses strings that we allow.
 ##
-failList = [
-  "GPL-3",
-  "LGPL-3.0",
-  "AGPL-3.0",
-  "MPL-2.0",
-  "EPL-1.0",
-  "Ms-RL",
-  "ODbL",
-  "RPL-1.5",
-  "NGPL",
-  "RSPL-1.0",
-  "OCLC-2.0",
-  "UNKNOWN",
-  "GPL-1.0",
-  "GPL-2.0",
-  "GPL-3.0",
-  "GPL",
-  "Custom"
+allowedList = [
+  "AFLv2.1",
+  "Apache License, Version 2.0",
+  "Apache*",
+  "Apache-2.0",
+  "BSD",
+  "BSD*",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "CC-BY-3.0",
+  "CC0-1.0",
+  "ISC",
+  "MIT",
+  "MIT*",
+  "Public Domain",
+  "UNLICENSED",
+  "Unlicense",
+  "Unlicensed",
+  "WTFPL",
 ]
