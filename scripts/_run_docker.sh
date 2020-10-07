@@ -104,6 +104,15 @@ function processDockerImage() {
   docker cp $containerName:/opt/$containerName/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
   docker cp $containerName:/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
 
+  # If node_modules is not found, look also in WORKDIR of docker image
+  if [ ! "$(ls -A /tmp/${containerName}/node_modules)" ]; then
+    workDirPath=$(docker inspect --format='{{.Config.WorkingDir}}' $containerName)
+    if [ $? -eq 0 ]; then
+      docker cp $containerName:$workDirPath/node_modules /tmp/$containerName/ > /dev/null 2>&1
+      docker cp $containerName:$workDirPath/src/node_modules /tmp/$containerName/ > /dev/null 2>&1
+    fi
+  fi
+
   # check that the copy worked - this seems especially brittle
   if [ "$(ls -A /tmp/${containerName}/node_modules)" ]; then
     logSubStep "Copied node_modules successfully"
