@@ -1,5 +1,7 @@
 # License-Scanner
 
+TEMP TEST CLA~~
+
 A tool for scanning the licenses of many Node projects at once. 
 
 ## Installation
