@@ -40,29 +40,30 @@ make postprocess
 make cleanup
 ```
 
-## Updating License Blacklist and Package Whitelist
+## Updating License and Package Whitelist
 
-In order consistently manage the blacklisted licenses and whitelisted packages, we use the same `config.toml` file across all Mojaloop projects.
+In order consistently manage the whitelist of licenses and packages, we use the same `config.toml` file across all Mojaloop projects.
 
-__Adding a new License identifier to the blacklist:__
+__Adding a new License identifier to the whitelist:__
 
-Edit `config.tml`, and add the license string into the `failList` array:
+Edit `config.tml`, and add the license string into the `allowedList` array:
 ```
-failList = [
-  "UNKNOWN",
-  "GPL-1.0",
-  "GPL-2.0",
-  "GPL-3.0",
-  #add your license here
+allowedList = [
+  "AFLv2.1",
+  "Apache License, Version 2.0",
+  "Apache*",
+  "Apache-2.0",
+  "BSD"
+  ...
 ]
 ```
 
-Once your change is in master, all CircleCI builds will fail if that identifier is found.
+Once your change is in master, all CircleCI using the license-scanner will be affected. This means that if you remove an allowed license from the list, you could cause breaks across many repos. So be careful!
 
 
 __Adding a new package to the whitelist:__
 
-In addition to maintaining a blacklist of licenses, we whitelist packages that we have manually audited and are happy to include.
+In addition to maintaining the license list, we whitelist packages that we have manually audited and are happy to include.
 The most common case for this is packages that don't have a license entry in the `package.json` file, which the npm license scan tool lists as `UNKNOWN`.
 
 
@@ -94,7 +95,7 @@ Open the `config.toml` file, and edit the following entries:
 
 * change `pathToRepo` to point to your repo, or override this with a `pathToRepo` env variable
 * define your packages to ignore in `excludeList`
-* add licenses you won't allow in `failList`
+* add licenses you explicitly allow in `allowedList`
 
 
 __4. Run__

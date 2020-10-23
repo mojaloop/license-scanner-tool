@@ -40,7 +40,7 @@ fi
 
 excludeList=`echo ${excludeList} | awk '{MAX=split($0,a,";"); for (x=1; x <= MAX; x = x + 2) {printf a[x]; printf ";";}}'`
 echo "Excluding the following packages: ${excludeList}"
-echo "Failing on the following licenses: ${failList}"
+echo "Allowing only the following licenses: ${allowedList}"
 
 function listLicenses() {
   containerName=$1
@@ -58,14 +58,18 @@ function checkLicenses() {
   nodeDirectory=$2
   cd ${nodeDirectory}
 
+  # TODO: deal with spaces better in onlyAllow list...
   ${LIB_DIR}/node_modules/.bin/license-checker  . \
-    --excludePackages ${excludeList} \
-    --failOn ${failList} \
+    --excludePackages "${excludeList}" \
+    --onlyAllow "${allowedList}" \
     --production --csv > ${output}
+  result=$?
 
   if [ "${LOG_LEVEL}" == "info" ]; then
     cat ${output}
   fi
+
+  return ${result}
 }
 
 function processDockerImage() {
@@ -78,11 +82,10 @@ function processDockerImage() {
   docker rm -f $containerName  > /dev/null 2>&1 || logSubStep 'Container already stopped'
   docker pull $stepDockerImage
 
-  # Make sure the container exists, and we can pull it
+  # Check if the image exists, and we can pull it
   dockerPullResult=$?
   if [ ${dockerPullResult} -ne 0 ]; then
-    logErr "failed to pull docker image: ${stepDockerImage}. Aborting."
-    exit ${dockerPullResult}
+    logWarn "failed to pull docker image: ${stepDockerImage}. This may not be fatal"
   fi
 
   logSubStep "Creating $containerName from $stepDockerImage"
@@ -90,19 +93,37 @@ function processDockerImage() {
   # create a non-running container
   docker create --name $containerName $stepDockerImage
 
-  # copy out node_modules
-  # Hacky workaround for inconsistent naming of mojaloop simulator: TODO: remote this once ticket is closed
-  # Open Ticket: https://github.com/mojaloop/project/issues/929
-  if [ "$containerName" == "simulator" ]; then
-    logWarn "mojaloop/simulator file path is inconsistent - using temporary hacky workaround to get node_modules"
-    docker cp $containerName:/opt/simulators/node_modules /tmp/$containerName/node_modules
-  else 
-    docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/node_modules
+  dockerCreateResult=$?
+  if [ ${dockerCreateResult} -ne 0 ]; then
+    logErr "failed to create docker image: ${stepDockerImage}. Aborting"
+    exit ${dockerCreateResult}
+  fi
+
+  # copy out node_modules - look in project root as well as .<project>/src and /src
+  docker cp $containerName:/opt/$containerName/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+  docker cp $containerName:/opt/$containerName/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+  docker cp $containerName:/src/node_modules /tmp/$containerName/ > /dev/null 2>&1 
+
+  # If node_modules is not found, look also in WORKDIR of docker image
+  if [ ! "$(ls -A /tmp/${containerName}/node_modules)" ]; then
+    workDirPath=$(docker inspect --format='{{.Config.WorkingDir}}' $containerName)
+    if [ $? -eq 0 ]; then
+      docker cp $containerName:$workDirPath/node_modules /tmp/$containerName/ > /dev/null 2>&1
+      docker cp $containerName:$workDirPath/src/node_modules /tmp/$containerName/ > /dev/null 2>&1
+    fi
+  fi
+
+  # check that the copy worked - this seems especially brittle
+  if [ "$(ls -A /tmp/${containerName}/node_modules)" ]; then
+    logSubStep "Copied node_modules successfully"
+  else
+    logErr "Fatal Error. Failed to copy node modules out of docker image: ${stepDockerImage}. Aborting"
+    exit 1
   fi
 
   # run the license scan
-  listLicenses ${containerName} /tmp/$containerName/node_modules
-  checkLicenses ${containerName} /tmp/$containerName/node_modules
+  listLicenses ${containerName} /tmp/$containerName
+  checkLicenses ${containerName} /tmp/$containerName
   result=$?
 
   #cleanup
@@ -117,11 +138,23 @@ function processDockerImage() {
 
 # change delimiter from `;` to ` ` to allow for simple iteration
 dockerImages=`echo ${dockerImages} | awk '{gsub(/[;]/," ");print}'`
+skipDockerImages=`echo ${skipDockerImages} | awk '{gsub(/[;]/," ");print}'`
 
-# iterate through docker images
+# iterate through docker images and skipDockerImages
 for OUTPUT in ${dockerImages}
 do
-  processDockerImage ${OUTPUT}
+  shouldSkip=0
+  for SKIP_IMAGE in ${skipDockerImages}
+  do
+    if [[ ${OUTPUT} == *"${SKIP_IMAGE}"* ]]; then
+      logStep "Skipping validation for ${OUTPUT}"
+      shouldSkip=1
+    fi
+  done
+
+  if [[ shouldSkip -eq 0 ]]; then
+    processDockerImage ${OUTPUT}
+  fi
 done
 
 exit 0
