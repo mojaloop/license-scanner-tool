@@ -16,7 +16,7 @@ mode = 'local'
 
 
 # How we should process the licenses
-# options are: 
+# options are:
 # - "fossa-api": will export to fossa api (requires FOSSA_API_KEY to be set in .env)
 # - "fossa-json": will export from fossa to a folder of json files. This just shows import heirarchies, and doesn't scan licenses
 # - "lc-csv": will use npm license-checker, and export to a list of csv files
@@ -154,6 +154,7 @@ allowedList = [
   "MIT",
   "MIT*",
   "Public Domain",
+  "Python-2.0",
   "UNLICENSED",
   "Unlicense",
   "Unlicensed",
