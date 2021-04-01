@@ -1,6 +1,6 @@
 {
   "name": "@mojaloop/license-scanner-scripts",
-  "version": "7.3.1",
+  "version": "7.3.2",
   "description": "",
   "main": "test_xlsx.js",
   "scripts": {
