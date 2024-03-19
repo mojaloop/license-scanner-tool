@@ -134,6 +134,7 @@ excludeList = [
   "spdx-exceptions@2.2.0;Requires attribution",
   "map-stream@0.1.0;Custom license not conforming to standard formats, but MIT license specified on Github and NPM.org. Issue fixed on v4.x and later, but direct dependencies have not been updated respectively.",
   "axe-core@4.4.3;MPL2 License, new files containing no MPL-licensed code are not Modifications, and therefore do not need to be distributed under the terms of the MPL, a Larger Work (as defined in Section 1.7 of the MPL License) by using, compiling, or distributing the non-MPL files together with MPL-licensed files"
+  "@redocly/config@0.1.3;Contains MIT license on github, but not listed in package.json"
 ]
 
 ##
