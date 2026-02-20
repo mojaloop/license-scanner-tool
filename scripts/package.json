@@ -14,8 +14,5 @@
     "toml": "3.0.0",
     "xlsx-style": "0.8.13",
     "xlsx-workbook": "1.0.3"
-  },
-  "overrides": {
-    "jszip": "3.10.1"
   }
 }
