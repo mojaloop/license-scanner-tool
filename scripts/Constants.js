@@ -1,4 +1,6 @@
-const xlsxFile = `${__dirname}/../results/license-summary.xlsx`
+const path = require('path')
+
+const xlsxFile = path.join(__dirname, '..', 'results', 'license-summary.xlsx')
 
 /* Constants */
 const COLUMN_PACKAGE = 0
@@ -10,26 +12,26 @@ const LICENSE_STRING_MATCH_THRESHOLD = 75
 
 const cellStyleError = {
   font: {
-    color: { rgb: "9C0007" }
+    color: { rgb: '9C0007' }
   },
   fill: {
-    fgColor: { rgb: "FFC7CE" }
+    fgColor: { rgb: 'FFC7CE' }
   }
 }
 
 const cellStyleWarning = {
   font: {
-    color: { rgb: "9C5700" }
+    color: { rgb: '9C5700' }
   },
   fill: {
-    fgColor: { rgb: "FFEB9B" }
+    fgColor: { rgb: 'FFEB9B' }
   }
 }
 
 const cellStyleBold = {
   font: {
     bold: true
-  },
+  }
 }
 
 module.exports = {
@@ -41,5 +43,5 @@ module.exports = {
   LICENSE_STRING_MATCH_THRESHOLD,
   cellStyleError,
   cellStyleWarning,
-  cellStyleBold,
+  cellStyleBold
 }

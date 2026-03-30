@@ -1,0 +1,17 @@
+# CircleCI configuration using the mojaloop/build orb
+# This streamlined config uses the mojaloop/build orb for standardized CI/CD workflows
+
+version: 2.1
+setup: true
+
+orbs:
+  build: mojaloop/build@1.1.19
+
+workflows:
+  setup:
+    jobs:
+      - build/workflow:
+          context: org-global
+          filters:
+            tags:
+              only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/

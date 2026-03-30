@@ -1,0 +1,15 @@
+{
+  "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
+  // audit-ci supports reading JSON, JSONC, and JSON5 config files.
+  // Only use one of ["low": true, "moderate": true, "high": true, "critical": true]
+  "moderate": true,
+  "allowlist": [
+    "GHSA-jg8v-48h5-wgxg", // jszip Prototype Pollution - unfixable, transitive via xlsx-style (abandoned fork)
+    "GHSA-36fh-84j7-cv5h", // jszip Path Traversal - unfixable, transitive via xlsx-style (abandoned fork)
+    "GHSA-g973-978j-2c3p", // xlsx DoS - unfixable, transitive via xlsx-workbook
+    "GHSA-3x9f-74h4-2fqr", // xlsx DoS - unfixable, transitive via xlsx-workbook
+    "GHSA-8vcr-vxm8-293m", // xlsx DoS - unfixable, transitive via xlsx-workbook
+    "GHSA-4r6h-8v6p-xvw6", // xlsx Prototype Pollution - unfixable, transitive via xlsx-workbook
+    "GHSA-5pgg-2g8v-p4x9"  // xlsx ReDoS - unfixable, transitive via xlsx-workbook
+  ]
+}
