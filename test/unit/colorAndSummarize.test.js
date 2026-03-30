@@ -30,6 +30,8 @@ const mockFuzz = {
   ratio: Sinon.stub()
 }
 
+const mockConst = require('../../scripts/Constants')
+
 const mockAllowedList = ['MIT', 'Apache-2.0', 'ISC']
 const mockExcludeList = [
   { pkg: 'excluded-pkg@1.0.0', reason: 'Manually reviewed' }
@@ -248,6 +250,145 @@ Test('getWarningRows', t => {
 
     const warnings = colorModule.getWarningRows(sheet)
     t.equal(warnings.length, 0)
+    t.end()
+  })
+
+  t.test('should skip rows without package string', t => {
+    const sheet = {
+      '!ref': 'A1:B1',
+      B1: { v: 'MIT' }
+    }
+
+    const warnings = colorModule.getWarningRows(sheet)
+    t.equal(warnings.length, 0, 'skips rows without package')
+    t.end()
+  })
+
+  t.end()
+})
+
+Test('addErrorsToSheet', t => {
+  t.test('should add error styling and reason column to sheet', t => {
+    const sheet = {
+      '!ref': 'A1:C2',
+      A1: { v: 'Package', t: 's' },
+      B1: { v: 'License', t: 's' },
+      C1: { v: 'Github', t: 's' },
+      A2: { v: 'bad-pkg', t: 's' },
+      B2: { v: 'GPL-3.0', t: 's' },
+      C2: { v: 'https://github.com/bad', t: 's' }
+    }
+
+    const errorRows = [{
+      row: 1,
+      ctx: { reason: 'Disallowed license', license: 'GPL-3.0', pkg: 'bad-pkg' }
+    }]
+
+    colorModule.addErrorsToSheet(sheet, errorRows)
+
+    // Reason header added at column D row 0
+    t.ok(sheet.D1, 'reason header cell exists')
+    t.equal(sheet.D1.v, 'reason', 'reason header value')
+
+    // Error reason added at column D row 1
+    t.ok(sheet.D2, 'error reason cell exists')
+    t.equal(sheet.D2.v, 'Disallowed license', 'error reason value')
+    t.deepEqual(sheet.D2.s, mockConst.cellStyleError, 'error reason has error style')
+
+    // Existing cells should have error styling
+    t.deepEqual(sheet.A2.s, mockConst.cellStyleError, 'row cells get error style')
+    t.deepEqual(sheet.B2.s, mockConst.cellStyleError, 'license cell gets error style')
+
+    // Range should be expanded to include new column
+    t.equal(sheet['!ref'], 'A1:D2', 'range expanded')
+    t.end()
+  })
+
+  t.test('should skip null cells when applying styles', t => {
+    const sheet = {
+      '!ref': 'A1:B1',
+      A1: { v: 'pkg', t: 's' }
+      // B1 is missing/null
+    }
+
+    const errorRows = [{
+      row: 0,
+      ctx: { reason: 'Bad' }
+    }]
+
+    colorModule.addErrorsToSheet(sheet, errorRows)
+    t.notOk(sheet.B1, 'null cell remains null')
+    t.end()
+  })
+
+  t.test('should handle empty error rows', t => {
+    const sheet = {
+      '!ref': 'A1:B1',
+      A1: { v: 'pkg', t: 's' }
+    }
+
+    colorModule.addErrorsToSheet(sheet, [])
+    t.ok(sheet.D1, 'reason header still added')
+    t.equal(sheet.D1.v, 'reason')
+    t.end()
+  })
+
+  t.end()
+})
+
+Test('addWarningsToSheet', t => {
+  t.test('should add warning styling and reason column to sheet', t => {
+    const sheet = {
+      '!ref': 'A1:C2',
+      A1: { v: 'Package', t: 's' },
+      B1: { v: 'License', t: 's' },
+      C1: { v: 'Github', t: 's' },
+      A2: { v: 'warned-pkg', t: 's' },
+      B2: { v: 'Custom-1.0', t: 's' },
+      C2: { v: 'https://github.com/warned', t: 's' }
+    }
+
+    const warningRows = [{
+      row: 1,
+      ctx: { reason: 'Manually reviewed', pkg: 'warned-pkg' }
+    }]
+
+    colorModule.addWarningsToSheet(sheet, warningRows)
+
+    // Warning reason added at column D row 1
+    t.ok(sheet.D2, 'warning reason cell exists')
+    t.equal(sheet.D2.v, 'Manually reviewed', 'warning reason value')
+    t.deepEqual(sheet.D2.s, mockConst.cellStyleWarning, 'warning reason has warning style')
+
+    // Existing cells should have warning styling
+    t.deepEqual(sheet.A2.s, mockConst.cellStyleWarning, 'row cells get warning style')
+    t.end()
+  })
+
+  t.test('should skip null cells when applying warning styles', t => {
+    const sheet = {
+      '!ref': 'A1:B1',
+      A1: { v: 'pkg', t: 's' }
+    }
+
+    const warningRows = [{
+      row: 0,
+      ctx: { reason: 'Reviewed' }
+    }]
+
+    colorModule.addWarningsToSheet(sheet, warningRows)
+    t.notOk(sheet.B1, 'null cell remains null')
+    t.end()
+  })
+
+  t.test('should handle empty warning rows', t => {
+    const sheet = {
+      '!ref': 'A1:B1',
+      A1: { v: 'pkg', t: 's' }
+    }
+
+    colorModule.addWarningsToSheet(sheet, [])
+    t.notOk(sheet.D1, 'no warning cells added')
     t.end()
   })
 
