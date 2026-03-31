@@ -1,0 +1,4 @@
+# Dependencies to exclude from update checks
+reject: [
+  "license-checker" # Uses a forked git dependency, not an npm registry package
+]
