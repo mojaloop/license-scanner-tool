@@ -90,6 +90,27 @@ Test('getCellForSheet', t => {
     t.end()
   })
 
+  t.test('should return 0 when cell value is zero', t => {
+    const ws = createWorksheet({ A1: 0 })
+    const result = colorModule.getCellForSheet(ws, 0, 0)
+    t.equal(result, 0, 'preserves numeric zero')
+    t.end()
+  })
+
+  t.test('should return false when cell value is false', t => {
+    const ws = createWorksheet({ A1: false })
+    const result = colorModule.getCellForSheet(ws, 0, 0)
+    t.equal(result, false, 'preserves boolean false')
+    t.end()
+  })
+
+  t.test('should return empty string when cell value is empty string', t => {
+    const ws = createWorksheet({ A1: '' })
+    const result = colorModule.getCellForSheet(ws, 0, 0)
+    t.equal(result, '', 'preserves empty string')
+    t.end()
+  })
+
   t.end()
 })
 

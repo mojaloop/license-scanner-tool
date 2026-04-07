@@ -8,7 +8,7 @@ const { allowedList, excludeList } = require('./Config')
 
 const getCellForSheet = (worksheet, column, row) => {
   const cell = worksheet.getCell(row + 1, column + 1)
-  return cell.value || undefined
+  return cell.value != null ? cell.value : undefined
 }
 
 /**
@@ -302,6 +302,11 @@ const main = async () => {
 
     // Copy processed sheet to output workbook
     const outSheet = outputWorkbook.addWorksheet(name)
+    worksheet.columns.forEach((col, idx) => {
+      if (col && col.width) {
+        outSheet.getColumn(idx + 1).width = col.width
+      }
+    })
     worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
       const newRow = outSheet.getRow(rowNumber)
       row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
