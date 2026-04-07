@@ -3,28 +3,7 @@
 const Test = require('tape')
 const Sinon = require('sinon')
 const proxyquire = require('proxyquire').noCallThru()
-
-const mockXLSX = {
-  utils: {
-    encode_cell: ({ c, r }) => {
-      const col = String.fromCharCode(65 + c)
-      return `${col}${r + 1}`
-    },
-    decode_range: (ref) => {
-      // Simple parser for ranges like "A1:D5"
-      const parts = ref.split(':')
-      return {
-        s: { c: 0, r: 0 },
-        e: { c: parts[1].charCodeAt(0) - 65, r: parseInt(parts[1].slice(1)) - 1 }
-      }
-    },
-    encode_range: (range) => {
-      const s = String.fromCharCode(65 + range.s.c) + (range.s.r + 1)
-      const e = String.fromCharCode(65 + range.e.c) + (range.e.r + 1)
-      return `${s}:${e}`
-    }
-  }
-}
+const ExcelJS = require('exceljs')
 
 const mockFuzz = {
   ratio: Sinon.stub()
@@ -38,10 +17,24 @@ const mockExcludeList = [
 ]
 
 const colorModule = proxyquire('../../scripts/_color_and_summarize', {
-  'xlsx-style': mockXLSX,
+  exceljs: ExcelJS,
   fuzzball: mockFuzz,
   './Config': { allowedList: mockAllowedList, excludeList: mockExcludeList }
 })
+
+/**
+ * Helper: create an ExcelJS worksheet populated with cell data
+ * @param {Object} data - keyed by cell reference (e.g. { A1: 'value', B2: 'other' })
+ * @returns {ExcelJS.Worksheet}
+ */
+const createWorksheet = (data) => {
+  const wb = new ExcelJS.Workbook()
+  const ws = wb.addWorksheet('test')
+  for (const [ref, value] of Object.entries(data)) {
+    ws.getCell(ref).value = value
+  }
+  return ws
+}
 
 Test('fuzzyContains', t => {
   t.test('should return index when fuzzy match found', t => {
@@ -84,17 +77,15 @@ Test('fuzzyContains', t => {
 
 Test('getCellForSheet', t => {
   t.test('should return cell value when cell exists', t => {
-    const sheet = {
-      A1: { v: 'test-value' }
-    }
-    const result = colorModule.getCellForSheet(sheet, 0, 0)
+    const ws = createWorksheet({ A1: 'test-value' })
+    const result = colorModule.getCellForSheet(ws, 0, 0)
     t.equal(result, 'test-value')
     t.end()
   })
 
   t.test('should return undefined when cell does not exist', t => {
-    const sheet = {}
-    const result = colorModule.getCellForSheet(sheet, 0, 0)
+    const ws = createWorksheet({})
+    const result = colorModule.getCellForSheet(ws, 0, 0)
     t.equal(result, undefined)
     t.end()
   })
@@ -136,22 +127,22 @@ Test('addToSummaryRows', t => {
 
 Test('addSummaryRowsToSummarySheet', t => {
   t.test('should add rows to sheet and return count', t => {
-    const sheet = {}
+    const ws = createWorksheet({})
     const summaryRows = [
       ['proj', 'pkg', 'MIT', 'url', '', 'BAD', 'reason']
     ]
     const style = { font: { bold: true } }
 
-    const count = colorModule.addSummaryRowsToSummarySheet(sheet, summaryRows, style, 0)
+    const count = colorModule.addSummaryRowsToSummarySheet(ws, summaryRows, style, 0)
     t.equal(count, 1, 'returns row count')
-    t.ok(sheet.A2, 'cell A2 exists')
-    t.equal(sheet.A2.v, 'proj', 'cell A2 value is correct')
+    // Row index 0 + 1 = row 1, excel row = 2 (1-indexed)
+    t.equal(ws.getCell(2, 1).value, 'proj', 'cell value is correct')
     t.end()
   })
 
   t.test('should return 0 for empty rows', t => {
-    const sheet = {}
-    const count = colorModule.addSummaryRowsToSummarySheet(sheet, [], {}, 0)
+    const ws = createWorksheet({})
+    const count = colorModule.addSummaryRowsToSummarySheet(ws, [], {}, 0)
     t.equal(count, 0)
     t.end()
   })
@@ -163,15 +154,13 @@ Test('getErrorRows', t => {
   t.test('should identify rows with disallowed licenses', t => {
     mockFuzz.ratio.returns(0) // No fuzzy match = disallowed
 
-    // Single data row, no header (range starts at row 0)
-    const sheet = {
-      '!ref': 'A1:C1',
-      A1: { v: 'bad-pkg' },
-      B1: { v: 'GPL-3.0' },
-      C1: { v: 'https://github.com/bad' }
-    }
+    const ws = createWorksheet({
+      A1: 'bad-pkg',
+      B1: 'GPL-3.0',
+      C1: 'https://github.com/bad'
+    })
 
-    const errors = colorModule.getErrorRows(sheet)
+    const errors = colorModule.getErrorRows(ws)
     t.equal(errors.length, 1, 'finds 1 error')
     t.equal(errors[0].row, 0, 'error is on row 0')
     t.equal(errors[0].ctx.license, 'GPL-3.0')
@@ -182,13 +171,12 @@ Test('getErrorRows', t => {
     mockFuzz.ratio.returns(0)
     mockFuzz.ratio.withArgs('MIT', 'MIT').returns(100)
 
-    const sheet = {
-      '!ref': 'A1:B1',
-      A1: { v: 'good-pkg' },
-      B1: { v: 'MIT' }
-    }
+    const ws = createWorksheet({
+      A1: 'good-pkg',
+      B1: 'MIT'
+    })
 
-    const errors = colorModule.getErrorRows(sheet)
+    const errors = colorModule.getErrorRows(ws)
     t.equal(errors.length, 0, 'no errors for allowed license')
     t.end()
   })
@@ -196,12 +184,11 @@ Test('getErrorRows', t => {
   t.test('should skip rows without license string', t => {
     mockFuzz.ratio.returns(0)
 
-    const sheet = {
-      '!ref': 'A1:B1',
-      A1: { v: 'pkg' }
-    }
+    const ws = createWorksheet({
+      A1: 'pkg'
+    })
 
-    const errors = colorModule.getErrorRows(sheet)
+    const errors = colorModule.getErrorRows(ws)
     t.equal(errors.length, 0, 'no errors when no license')
     t.end()
   })
@@ -209,13 +196,12 @@ Test('getErrorRows', t => {
   t.test('should skip excluded packages', t => {
     mockFuzz.ratio.returns(0)
 
-    const sheet = {
-      '!ref': 'A1:B1',
-      A1: { v: 'excluded-pkg@1.0.0' },
-      B1: { v: 'GPL-3.0' }
-    }
+    const ws = createWorksheet({
+      A1: 'excluded-pkg@1.0.0',
+      B1: 'GPL-3.0'
+    })
 
-    const errors = colorModule.getErrorRows(sheet)
+    const errors = colorModule.getErrorRows(ws)
     t.equal(errors.length, 0, 'excluded package not flagged')
     t.end()
   })
@@ -225,41 +211,38 @@ Test('getErrorRows', t => {
 
 Test('getWarningRows', t => {
   t.test('should identify excluded packages as warnings', t => {
-    const sheet = {
-      '!ref': 'A1:C2',
-      A1: { v: 'Package' },
-      B1: { v: 'License' },
-      C1: { v: 'Github' },
-      A2: { v: 'excluded-pkg@1.0.0' },
-      B2: { v: 'Custom' },
-      C2: { v: 'https://github.com/excluded' }
-    }
+    const ws = createWorksheet({
+      A1: 'Package',
+      B1: 'License',
+      C1: 'Github',
+      A2: 'excluded-pkg@1.0.0',
+      B2: 'Custom',
+      C2: 'https://github.com/excluded'
+    })
 
-    const warnings = colorModule.getWarningRows(sheet)
+    const warnings = colorModule.getWarningRows(ws)
     t.equal(warnings.length, 1, 'finds 1 warning')
     t.equal(warnings[0].ctx.reason, 'Manually reviewed')
     t.end()
   })
 
   t.test('should return empty array when no excluded packages', t => {
-    const sheet = {
-      '!ref': 'A1:C2',
-      A1: { v: 'Package' },
-      A2: { v: 'normal-pkg' }
-    }
+    const ws = createWorksheet({
+      A1: 'Package',
+      A2: 'normal-pkg'
+    })
 
-    const warnings = colorModule.getWarningRows(sheet)
+    const warnings = colorModule.getWarningRows(ws)
     t.equal(warnings.length, 0)
     t.end()
   })
 
   t.test('should skip rows without package string', t => {
-    const sheet = {
-      '!ref': 'A1:B1',
-      B1: { v: 'MIT' }
-    }
+    const ws = createWorksheet({
+      B1: 'MIT'
+    })
 
-    const warnings = colorModule.getWarningRows(sheet)
+    const warnings = colorModule.getWarningRows(ws)
     t.equal(warnings.length, 0, 'skips rows without package')
     t.end()
   })
@@ -269,67 +252,62 @@ Test('getWarningRows', t => {
 
 Test('addErrorsToSheet', t => {
   t.test('should add error styling and reason column to sheet', t => {
-    const sheet = {
-      '!ref': 'A1:C2',
-      A1: { v: 'Package', t: 's' },
-      B1: { v: 'License', t: 's' },
-      C1: { v: 'Github', t: 's' },
-      A2: { v: 'bad-pkg', t: 's' },
-      B2: { v: 'GPL-3.0', t: 's' },
-      C2: { v: 'https://github.com/bad', t: 's' }
-    }
+    const ws = createWorksheet({
+      A1: 'Package',
+      B1: 'License',
+      C1: 'Github',
+      A2: 'bad-pkg',
+      B2: 'GPL-3.0',
+      C2: 'https://github.com/bad'
+    })
 
     const errorRows = [{
       row: 1,
       ctx: { reason: 'Disallowed license', license: 'GPL-3.0', pkg: 'bad-pkg' }
     }]
 
-    colorModule.addErrorsToSheet(sheet, errorRows)
+    colorModule.addErrorsToSheet(ws, errorRows)
 
-    // Reason header added at column D row 0
-    t.ok(sheet.D1, 'reason header cell exists')
-    t.equal(sheet.D1.v, 'reason', 'reason header value')
+    // Reason header added at column D row 1
+    t.equal(ws.getCell(1, 4).value, 'reason', 'reason header value')
 
-    // Error reason added at column D row 1
-    t.ok(sheet.D2, 'error reason cell exists')
-    t.equal(sheet.D2.v, 'Disallowed license', 'error reason value')
-    t.deepEqual(sheet.D2.s, mockConst.cellStyleError, 'error reason has error style')
+    // Error reason added at column D row 2
+    t.equal(ws.getCell(2, 4).value, 'Disallowed license', 'error reason value')
+    t.deepEqual(ws.getCell(2, 4).font, mockConst.cellStyleError.font, 'error reason has error font')
+    t.deepEqual(ws.getCell(2, 4).fill, mockConst.cellStyleError.fill, 'error reason has error fill')
 
     // Existing cells should have error styling
-    t.deepEqual(sheet.A2.s, mockConst.cellStyleError, 'row cells get error style')
-    t.deepEqual(sheet.B2.s, mockConst.cellStyleError, 'license cell gets error style')
-
-    // Range should be expanded to include new column
-    t.equal(sheet['!ref'], 'A1:D2', 'range expanded')
+    t.deepEqual(ws.getCell(2, 1).font, mockConst.cellStyleError.font, 'row cells get error font')
+    t.deepEqual(ws.getCell(2, 2).font, mockConst.cellStyleError.font, 'license cell gets error font')
     t.end()
   })
 
   t.test('should skip null cells when applying styles', t => {
-    const sheet = {
-      '!ref': 'A1:B1',
-      A1: { v: 'pkg', t: 's' }
-      // B1 is missing/null
-    }
+    // Create worksheet with a gap: A1 has value, B1 empty, C1 has value
+    const ws = createWorksheet({
+      A1: 'pkg',
+      C1: 'https://github.com/pkg'
+    })
 
     const errorRows = [{
       row: 0,
       ctx: { reason: 'Bad' }
     }]
 
-    colorModule.addErrorsToSheet(sheet, errorRows)
-    t.notOk(sheet.B1, 'null cell remains null')
+    colorModule.addErrorsToSheet(ws, errorRows)
+    t.notOk(ws.getCell(1, 2).value, 'null cell remains empty')
+    t.deepEqual(ws.getCell(1, 1).font, mockConst.cellStyleError.font, 'populated cell gets style')
+    t.deepEqual(ws.getCell(1, 3).font, mockConst.cellStyleError.font, 'other populated cell gets style')
     t.end()
   })
 
   t.test('should handle empty error rows', t => {
-    const sheet = {
-      '!ref': 'A1:B1',
-      A1: { v: 'pkg', t: 's' }
-    }
+    const ws = createWorksheet({
+      A1: 'pkg'
+    })
 
-    colorModule.addErrorsToSheet(sheet, [])
-    t.ok(sheet.D1, 'reason header still added')
-    t.equal(sheet.D1.v, 'reason')
+    colorModule.addErrorsToSheet(ws, [])
+    t.equal(ws.getCell(1, 4).value, 'reason', 'reason header still added')
     t.end()
   })
 
@@ -338,57 +316,89 @@ Test('addErrorsToSheet', t => {
 
 Test('addWarningsToSheet', t => {
   t.test('should add warning styling and reason column to sheet', t => {
-    const sheet = {
-      '!ref': 'A1:C2',
-      A1: { v: 'Package', t: 's' },
-      B1: { v: 'License', t: 's' },
-      C1: { v: 'Github', t: 's' },
-      A2: { v: 'warned-pkg', t: 's' },
-      B2: { v: 'Custom-1.0', t: 's' },
-      C2: { v: 'https://github.com/warned', t: 's' }
-    }
+    const ws = createWorksheet({
+      A1: 'Package',
+      B1: 'License',
+      C1: 'Github',
+      A2: 'warned-pkg',
+      B2: 'Custom-1.0',
+      C2: 'https://github.com/warned'
+    })
 
     const warningRows = [{
       row: 1,
       ctx: { reason: 'Manually reviewed', pkg: 'warned-pkg' }
     }]
 
-    colorModule.addWarningsToSheet(sheet, warningRows)
+    colorModule.addWarningsToSheet(ws, warningRows)
 
-    // Warning reason added at column D row 1
-    t.ok(sheet.D2, 'warning reason cell exists')
-    t.equal(sheet.D2.v, 'Manually reviewed', 'warning reason value')
-    t.deepEqual(sheet.D2.s, mockConst.cellStyleWarning, 'warning reason has warning style')
+    // Warning reason added at column D row 2
+    t.equal(ws.getCell(2, 4).value, 'Manually reviewed', 'warning reason value')
+    t.deepEqual(ws.getCell(2, 4).font, mockConst.cellStyleWarning.font, 'warning reason has warning font')
+    t.deepEqual(ws.getCell(2, 4).fill, mockConst.cellStyleWarning.fill, 'warning reason has warning fill')
 
     // Existing cells should have warning styling
-    t.deepEqual(sheet.A2.s, mockConst.cellStyleWarning, 'row cells get warning style')
+    t.deepEqual(ws.getCell(2, 1).font, mockConst.cellStyleWarning.font, 'row cells get warning font')
     t.end()
   })
 
   t.test('should skip null cells when applying warning styles', t => {
-    const sheet = {
-      '!ref': 'A1:B1',
-      A1: { v: 'pkg', t: 's' }
-    }
+    // Create worksheet with a gap: A1 has value, B1 empty, C1 has value
+    const ws = createWorksheet({
+      A1: 'pkg',
+      C1: 'https://github.com/pkg'
+    })
 
     const warningRows = [{
       row: 0,
       ctx: { reason: 'Reviewed' }
     }]
 
-    colorModule.addWarningsToSheet(sheet, warningRows)
-    t.notOk(sheet.B1, 'null cell remains null')
+    colorModule.addWarningsToSheet(ws, warningRows)
+    t.notOk(ws.getCell(1, 2).value, 'null cell remains empty')
+    t.deepEqual(ws.getCell(1, 1).font, mockConst.cellStyleWarning.font, 'populated cell gets style')
     t.end()
   })
 
   t.test('should handle empty warning rows', t => {
-    const sheet = {
-      '!ref': 'A1:B1',
-      A1: { v: 'pkg', t: 's' }
-    }
+    const ws = createWorksheet({
+      A1: 'pkg'
+    })
 
-    colorModule.addWarningsToSheet(sheet, [])
-    t.notOk(sheet.D1, 'no warning cells added')
+    colorModule.addWarningsToSheet(ws, [])
+    t.notOk(ws.getCell(1, 4).value, 'no warning cells added')
+    t.end()
+  })
+
+  t.end()
+})
+
+Test('applyStyleToCell', t => {
+  t.test('should apply font and fill styles', t => {
+    const ws = createWorksheet({ A1: 'test' })
+    const cell = ws.getCell('A1')
+
+    colorModule.applyStyleToCell(cell, mockConst.cellStyleError)
+    t.deepEqual(cell.font, mockConst.cellStyleError.font, 'font applied')
+    t.deepEqual(cell.fill, mockConst.cellStyleError.fill, 'fill applied')
+    t.end()
+  })
+
+  t.test('should handle style with only font', t => {
+    const ws = createWorksheet({ A1: 'test' })
+    const cell = ws.getCell('A1')
+
+    colorModule.applyStyleToCell(cell, mockConst.cellStyleBold)
+    t.deepEqual(cell.font, mockConst.cellStyleBold.font, 'font applied')
+    t.end()
+  })
+
+  t.test('should handle empty style', t => {
+    const ws = createWorksheet({ A1: 'test' })
+    const cell = ws.getCell('A1')
+
+    colorModule.applyStyleToCell(cell, {})
+    t.equal(cell.value, 'test', 'value unchanged')
     t.end()
   })
 

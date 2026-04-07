@@ -12,19 +12,23 @@ const LICENSE_STRING_MATCH_THRESHOLD = 75
 
 const cellStyleError = {
   font: {
-    color: { rgb: '9C0007' }
+    color: { argb: 'FF9C0007' }
   },
   fill: {
-    fgColor: { rgb: 'FFC7CE' }
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFFC7CE' }
   }
 }
 
 const cellStyleWarning = {
   font: {
-    color: { rgb: '9C5700' }
+    color: { argb: 'FF9C5700' }
   },
   fill: {
-    fgColor: { rgb: 'FFEB9B' }
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFFFEB9B' }
   }
 }
 

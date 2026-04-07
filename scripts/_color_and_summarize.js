@@ -1,16 +1,28 @@
 #!/usr/bin/env node
 
-const XLSX = require('xlsx-style')
+const ExcelJS = require('exceljs')
 const fuzz = require('fuzzball')
 
 const Const = require('./Constants')
 const { allowedList, excludeList } = require('./Config')
 
-const getCellForSheet = (sheet, column, row) => {
-  const add = { c: column, r: row }
-  const ref = XLSX.utils.encode_cell(add)
+const getCellForSheet = (worksheet, column, row) => {
+  const cell = worksheet.getCell(row + 1, column + 1)
+  return cell.value || undefined
+}
 
-  return sheet[ref] && sheet[ref].v
+/**
+ * @function applyStyleToCell
+ *
+ * @description Apply an ExcelJS style object to a cell
+ */
+const applyStyleToCell = (cell, style) => {
+  if (style.font) {
+    cell.font = style.font
+  }
+  if (style.fill) {
+    cell.fill = style.fill
+  }
 }
 
 /**
@@ -43,15 +55,14 @@ const fuzzyContains = (stringList, string, threshold = 95) => {
  *
  * @description Gets the rows that contain errors in the sheet
  *
- * @param {XLSX.Sheet} sheet
+ * @param {ExcelJS.Worksheet} worksheet
  */
-const getErrorRows = (sheet) => {
-  const range = XLSX.utils.decode_range(sheet['!ref'])
-
-  /* Find the rows with */
+const getErrorRows = (worksheet) => {
   const errorRowNumbers = []
-  for (let row = range.s.r; row <= range.e.r; ++row) {
-    const licenseString = getCellForSheet(sheet, Const.COLUMN_LICENSE, row)
+  const rowCount = worksheet.rowCount
+
+  for (let row = 0; row < rowCount; ++row) {
+    const licenseString = getCellForSheet(worksheet, Const.COLUMN_LICENSE, row)
     if (!licenseString) {
       continue
     }
@@ -60,8 +71,8 @@ const getErrorRows = (sheet) => {
     if (fuzzyIndex > -1) {
       continue
     }
-    const pkg = getCellForSheet(sheet, Const.COLUMN_PACKAGE, row)
-    const github = getCellForSheet(sheet, Const.COLUMN_GITHUB, row)
+    const pkg = getCellForSheet(worksheet, Const.COLUMN_PACKAGE, row)
+    const github = getCellForSheet(worksheet, Const.COLUMN_GITHUB, row)
 
     // Whitelist package
     const warningRowIdx = excludeList.map(r => r.pkg).indexOf(pkg)
@@ -93,23 +104,22 @@ const getErrorRows = (sheet) => {
  *
  * @description Gets the rows that contain warnings
  *
- * @param {XLSX.Sheet} sheet
+ * @param {ExcelJS.Worksheet} worksheet
  */
-const getWarningRows = (sheet) => {
-  const range = XLSX.utils.decode_range(sheet['!ref'])
-
-  /* Find the rows with */
+const getWarningRows = (worksheet) => {
   const warningRowNumbers = []
-  for (let row = range.s.r; row <= range.e.r; ++row) {
-    const packageString = getCellForSheet(sheet, Const.COLUMN_PACKAGE, row)
+  const rowCount = worksheet.rowCount
+
+  for (let row = 0; row < rowCount; ++row) {
+    const packageString = getCellForSheet(worksheet, Const.COLUMN_PACKAGE, row)
     if (!packageString) {
       continue
     }
 
     const warningRowIdx = excludeList.map(r => r.pkg).indexOf(packageString)
     if (warningRowIdx > -1) {
-      const license = getCellForSheet(sheet, Const.COLUMN_LICENSE, row)
-      const github = getCellForSheet(sheet, Const.COLUMN_GITHUB, row)
+      const license = getCellForSheet(worksheet, Const.COLUMN_LICENSE, row)
+      const github = getCellForSheet(worksheet, Const.COLUMN_GITHUB, row)
 
       warningRowNumbers.push({
         row,
@@ -130,100 +140,62 @@ const getWarningRows = (sheet) => {
  *
  * @description Add the errors to the worksheet
  *
- * @param {XLSX.Sheet} sheet
- * @param {Array<{row: number, ctx: {license: string, reason: string}}>} errorRows - An array contaning the indexes of errors
+ * @param {ExcelJS.Worksheet} worksheet
+ * @param {Array<{row: number, ctx: {license: string, reason: string}}>} errorRows
  */
-const addErrorsToSheet = (sheet, errorRows) => {
-  const range = XLSX.utils.decode_range(sheet['!ref'])
+const addErrorsToSheet = (worksheet, errorRows) => {
+  const columnCount = worksheet.columnCount
 
   /* Add a new "Reason" header */
-  const reasonRef = XLSX.utils.encode_cell({ c: Const.COLUMN_ERROR_MESSAGE, r: 0 })
-  sheet[reasonRef] = {
-    v: 'reason',
-    t: 's'
-  }
+  const reasonCol = Const.COLUMN_ERROR_MESSAGE + 1
+  worksheet.getCell(1, reasonCol).value = 'reason'
 
-  /**
-   * For each errorRow:
-   * - add an "Error message" column
-   * - change the color to red
-   */
   errorRows.forEach(row => {
-    const r = row.row
-    const address = { c: Const.COLUMN_ERROR_MESSAGE, r }
-    const ref = XLSX.utils.encode_cell(address)
+    const excelRow = row.row + 1
 
-    sheet[ref] = {
-      v: row.ctx.reason,
-      t: 's',
-      s: Const.cellStyleError
-    }
+    // Add error reason
+    const reasonCell = worksheet.getCell(excelRow, reasonCol)
+    reasonCell.value = row.ctx.reason
+    applyStyleToCell(reasonCell, Const.cellStyleError)
 
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ c: C, r })
-      const cell = sheet[cellRef]
-
-      if (!cell) {
+    // Style existing cells in the row
+    for (let C = 1; C <= columnCount; ++C) {
+      const cell = worksheet.getCell(excelRow, C)
+      if (!cell.value) {
         continue
       }
-
-      sheet[cellRef] = {
-        ...cell,
-        s: Const.cellStyleError
-      }
+      applyStyleToCell(cell, Const.cellStyleError)
     }
   })
-
-  const columns = range.e.c + 1
-  const newRange = {
-    s: range.s,
-    e: {
-      ...range.e,
-      c: columns
-    }
-  }
-
-  // Manually update the ref
-  sheet['!ref'] = XLSX.utils.encode_range(newRange)
 }
 
 /**
  * @function addWarningsToSheet
  *
- * @description Add the errors to the worksheet
+ * @description Add the warnings to the worksheet
  *
- * @param {XLSX.Sheet} sheet
- * @param {Array<{row: number, ctx: {package: string, reason: string}}>} warningRows - An array contaning the indexes of warnings
+ * @param {ExcelJS.Worksheet} worksheet
+ * @param {Array<{row: number, ctx: {package: string, reason: string}}>} warningRows
  */
-const addWarningsToSheet = (sheet, warningRows) => {
-  const range = XLSX.utils.decode_range(sheet['!ref'])
+const addWarningsToSheet = (worksheet, warningRows) => {
+  const columnCount = worksheet.columnCount
 
   warningRows.forEach(row => {
-    const r = row.row
-    const reason = row.ctx.reason
+    const excelRow = row.row + 1
 
-    // Add warning messages
-    const address = { c: Const.COLUMN_ERROR_MESSAGE, r }
-    const ref = XLSX.utils.encode_cell(address)
-    sheet[ref] = {
-      v: reason,
-      t: 's',
-      s: Const.cellStyleWarning
-    }
+    // Add warning reason
+    const reasonCol = Const.COLUMN_ERROR_MESSAGE + 1
+    const reasonCell = worksheet.getCell(excelRow, reasonCol)
+    reasonCell.value = row.ctx.reason
+    applyStyleToCell(reasonCell, Const.cellStyleWarning)
 
-    // Change color of row
-    for (let C = range.s.c; C <= range.e.c; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ c: C, r })
-      const cell = sheet[cellRef]
-
-      if (!cell) {
+    // Style existing cells in the row
+    for (let C = 1; C <= columnCount; ++C) {
+      const cell = worksheet.getCell(excelRow, C)
+      if (!cell.value) {
         continue
       }
-
-      sheet[cellRef] = {
-        ...cell,
-        s: Const.cellStyleWarning
-      }
+      applyStyleToCell(cell, Const.cellStyleWarning)
     }
   })
 }
@@ -248,28 +220,27 @@ const addToSummaryRows = (sheetName, errorRows, message) => {
 }
 
 /**
- * @function addToSummaryPage
+ * @function addSummaryRowsToSummarySheet
  *
- * @description Given a sheet, error rows and warning rows, add to the summary page
+ * @description Given a worksheet, add summary rows with styling
  *
- * @param {*} sheet
- * @param {*} summaryRows
- * @param {*} style
+ * @param {ExcelJS.Worksheet} worksheet
+ * @param {Array} summaryRows
+ * @param {Object} style
+ * @param {number} startRow - 0-indexed start row
  *
  * @returns {number} count - the number of rows added
  */
-const addSummaryRowsToSummarySheet = (sheet, summaryRows, style, startRow) => {
+const addSummaryRowsToSummarySheet = (worksheet, summaryRows, style, startRow) => {
   let rowIdx = startRow
   summaryRows.forEach(row => {
     rowIdx += 1
+    const excelRow = rowIdx + 1
 
     for (let C = 0; C <= 6; ++C) {
-      const cellRef = XLSX.utils.encode_cell({ c: C, r: rowIdx })
-      sheet[cellRef] = {
-        v: row[C],
-        t: 's',
-        s: style
-      }
+      const cell = worksheet.getCell(excelRow, C + 1)
+      cell.value = row[C]
+      applyStyleToCell(cell, style)
     }
   })
 
@@ -277,59 +248,72 @@ const addSummaryRowsToSummarySheet = (sheet, summaryRows, style, startRow) => {
 }
 
 /* istanbul ignore next */
-const main = () => {
-  const wb = XLSX.readFile(Const.xlsxFile)
-  const sheets = wb.SheetNames.map(sheetIdx => wb.Sheets[sheetIdx])
-  const summarySheet = {
-    '!ref': 'A1:G5',
-    '!cols': [
-      { wch: 20 },
-      { wch: 20 },
-      { wch: 16 },
-      { wch: 45 },
-      { wch: 2 },
-      { wch: 15 },
-      { wch: 55 }
-    ],
-    A1: { v: 'License Summary', t: 's', s: Const.cellStyleBold },
-    A4: { v: 'Project', t: 's', s: Const.cellStyleBold },
-    B4: { v: 'Package', t: 's', s: Const.cellStyleBold },
-    C4: { v: 'License', t: 's', s: Const.cellStyleBold },
-    D4: { v: 'Github', t: 's', s: Const.cellStyleBold },
-    F4: { v: 'Severity', t: 's', s: Const.cellStyleBold },
-    G4: { v: 'Notes', t: 's', s: Const.cellStyleBold }
-  }
+const main = async () => {
+  const workbook = new ExcelJS.Workbook()
+  await workbook.xlsx.readFile(Const.xlsxFile)
+
+  // Collect sheet data first, then process
+  const sheetData = []
+  workbook.eachSheet((worksheet) => {
+    sheetData.push({ name: worksheet.name, worksheet })
+  })
+
+  // Create summary sheet in a new workbook for proper ordering
+  const outputWorkbook = new ExcelJS.Workbook()
+  const summarySheet = outputWorkbook.addWorksheet('summary')
+  summarySheet.columns = [
+    { width: 20 },
+    { width: 20 },
+    { width: 16 },
+    { width: 45 },
+    { width: 2 },
+    { width: 15 },
+    { width: 55 }
+  ]
+
+  const headerCell = summarySheet.getCell(1, 1)
+  headerCell.value = 'License Summary'
+  applyStyleToCell(headerCell, Const.cellStyleBold)
+
+  const headers = ['Project', 'Package', 'License', 'Github', '', 'Severity', 'Notes']
+  headers.forEach((h, i) => {
+    const cell = summarySheet.getCell(4, i + 1)
+    cell.value = h
+    applyStyleToCell(cell, Const.cellStyleBold)
+  })
 
   let summaryRowIdx = 5
 
-  sheets.forEach((sheet, idx) => {
-    const sheetName = wb.SheetNames[idx]
-    console.log('Processing Sheet:', sheetName)
+  sheetData.forEach(({ name, worksheet }) => {
+    console.log('Processing Sheet:', name)
 
-    const errorRows = getErrorRows(sheet)
-    const warningRows = getWarningRows(sheet)
+    const errorRows = getErrorRows(worksheet)
+    const warningRows = getWarningRows(worksheet)
 
-    addErrorsToSheet(sheet, errorRows)
-    addWarningsToSheet(sheet, warningRows)
+    addErrorsToSheet(worksheet, errorRows)
+    addWarningsToSheet(worksheet, warningRows)
 
     /* Add to Summary */
-    const errorSummaryRows = addToSummaryRows(sheetName, errorRows, 'BAD')
+    const errorSummaryRows = addToSummaryRows(name, errorRows, 'BAD')
     summaryRowIdx += addSummaryRowsToSummarySheet(summarySheet, errorSummaryRows, Const.cellStyleError, summaryRowIdx)
 
-    const warnSummaryRows = addToSummaryRows(sheetName, warningRows, 'WARN')
+    const warnSummaryRows = addToSummaryRows(name, warningRows, 'WARN')
     summaryRowIdx += addSummaryRowsToSummarySheet(summarySheet, warnSummaryRows, Const.cellStyleWarning, summaryRowIdx)
+
+    // Copy processed sheet to output workbook
+    const outSheet = outputWorkbook.addWorksheet(name)
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      const newRow = outSheet.getRow(rowNumber)
+      row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+        const newCell = newRow.getCell(colNumber)
+        newCell.value = cell.value
+        if (cell.font) newCell.font = cell.font
+        if (cell.fill && cell.fill.type) newCell.fill = cell.fill
+      })
+    })
   })
 
-  /* Finish formatting Summary */
-  const newSummaryRange = {
-    s: { c: 0, r: 0 },
-    e: { c: 7, r: summaryRowIdx }
-  }
-  summarySheet['!ref'] = XLSX.utils.encode_range(newSummaryRange)
-  wb.Sheets.summary = summarySheet
-  wb.SheetNames.unshift('summary')
-
-  XLSX.writeFile(wb, Const.xlsxFile)
+  await outputWorkbook.xlsx.writeFile(Const.xlsxFile)
 }
 
 if (require.main === module) {
@@ -344,5 +328,6 @@ module.exports = {
   addErrorsToSheet,
   addWarningsToSheet,
   addToSummaryRows,
-  addSummaryRowsToSummarySheet
+  addSummaryRowsToSummarySheet,
+  applyStyleToCell
 }

@@ -1,27 +1,6 @@
 scan-type: source
 disabled: false
 ignore:
-  - vulnerability: GHSA-4r6h-8v6p-xvw6
-    include-aliases: true
-    reason: "Unfixable: xlsx via xlsx-style (abandoned fork)"
-  - vulnerability: GHSA-36fh-84j7-cv5h
-    include-aliases: true
-    reason: "Unfixable: jszip via xlsx-style (abandoned fork)"
-  - vulnerability: GHSA-3x9f-74h4-2fqr
-    include-aliases: true
-    reason: "Unfixable: xlsx via xlsx-workbook"
-  - vulnerability: GHSA-8vcr-vxm8-293m
-    include-aliases: true
-    reason: "Unfixable: xlsx via xlsx-workbook"
-  - vulnerability: GHSA-g973-978j-2c3p
-    include-aliases: true
-    reason: "Unfixable: xlsx via xlsx-workbook"
-  - vulnerability: GHSA-5pgg-2g8v-p4x9
-    include-aliases: true
-    reason: "Unfixable: xlsx via xlsx-workbook"
-  - vulnerability: GHSA-jg8v-48h5-wgxg
-    include-aliases: true
-    reason: "Unfixable: jszip via xlsx-style (abandoned fork)"
   - vulnerability: GHSA-f886-m6hf-6m8v
     include-aliases: true
     reason: "Unfixable: brace-expansion via lib/license-checker git dep"

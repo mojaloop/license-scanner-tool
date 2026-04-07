@@ -10,9 +10,8 @@
   "license": "Apache-2.0",
   "dependencies": {
     "csv-reader": "1.0.12",
+    "exceljs": "4.4.0",
     "fuzzball": "1.4.0",
-    "toml": "3.0.0",
-    "xlsx-style": "0.8.13",
-    "xlsx-workbook": "1.0.3"
+    "toml": "3.0.0"
   }
 }

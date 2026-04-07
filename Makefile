@@ -70,8 +70,6 @@ postprocess: post-csv-to-excel post-summarize-csv
 
 post-csv-to-excel:
 	@cd ${scripts_dir} && node _combine_csv_reports.js
-	@#fix issues with the xlsx package
-	@mv ${scripts_dir}/.xlsx  $(dir)/results/license-summary.xlsx 
 	@touch post-csv-to-excel
 
 post-summarize-csv:

@@ -3,7 +3,7 @@
 const Test = require('tape')
 const Sinon = require('sinon')
 const { Readable } = require('stream')
-const { getCsvFiles, readAndParseFile } = require('../../scripts/_combine_csv_reports')
+const { getCsvFiles, readAndParseFile, buildWorkbook } = require('../../scripts/_combine_csv_reports')
 const fs = require('fs')
 
 Test('getCsvFiles', t => {
@@ -91,6 +91,43 @@ Test('readAndParseFile', t => {
     t.deepEqual(rows, [], 'returns empty array')
 
     stub.restore()
+    t.end()
+  })
+
+  t.end()
+})
+
+Test('buildWorkbook', t => {
+  t.test('should create workbook with sheets from CSV data', t => {
+    const csvFiles = ['project-a.csv', 'project-b.csv']
+    const csvRows = [
+      [
+        ['package', 'license', 'github'],
+        ['pkg-a', 'MIT', 'https://github.com/a'],
+        ['pkg-b', 'Apache-2.0', 'https://github.com/b']
+      ],
+      [
+        ['package', 'license', 'github'],
+        ['pkg-c', 'ISC', 'https://github.com/c']
+      ]
+    ]
+
+    const workbook = buildWorkbook(csvFiles, csvRows)
+    t.equal(workbook.worksheets.length, 2, 'has 2 worksheets')
+    t.equal(workbook.worksheets[0].name, 'project-a', 'first sheet named correctly')
+    t.equal(workbook.worksheets[1].name, 'project-b', 'second sheet named correctly')
+
+    // Check data is sorted by license column (column 2)
+    const ws = workbook.worksheets[0]
+    t.equal(ws.getCell(1, 1).value, 'package', 'header row preserved')
+    t.equal(ws.getCell(2, 2).value, 'Apache-2.0', 'sorted: Apache-2.0 first')
+    t.equal(ws.getCell(3, 2).value, 'MIT', 'sorted: MIT second')
+    t.end()
+  })
+
+  t.test('should handle empty CSV data', t => {
+    const workbook = buildWorkbook([], [])
+    t.equal(workbook.worksheets.length, 0, 'no worksheets')
     t.end()
   })
 
