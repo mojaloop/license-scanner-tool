@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
 const fs = require('fs')
-const Workbook = require('xlsx-workbook').Workbook
+const path = require('path')
+const ExcelJS = require('exceljs')
 const CsvReadableStream = require('csv-reader')
+
+const Const = require('./Constants')
 
 const resultsDir = '../results/'
 
@@ -37,47 +40,44 @@ const readAndParseFile = (filePath) => {
   })
 }
 
+const buildWorkbook = (csvFiles, csvRows) => {
+  const workbook = new ExcelJS.Workbook()
+
+  csvRows.forEach((sheet, idx) => {
+    const sheetName = csvFiles[idx].replace('.csv', '')
+    console.log('Processing sheet:', sheetName)
+
+    const worksheet = workbook.addWorksheet(sheetName)
+
+    // Sort the sheet by the 2nd column, license
+    const headingRow = sheet.shift()
+    sheet.sort((r1, r2) => {
+      const license1 = r1[1]
+      const license2 = r2[1]
+
+      return license1.localeCompare(license2)
+    })
+    sheet.unshift(headingRow)
+
+    // Add rows to the worksheet
+    sheet.forEach((row) => {
+      worksheet.addRow(row)
+    })
+  })
+
+  return workbook
+}
+
 /* istanbul ignore next */
-const main = () => {
-  // Create a new workbook
-  const workbook = new Workbook()
+const main = async () => {
+  const csvFiles = await getCsvFiles()
+  const csvRows = await Promise.all(csvFiles.map(f => readAndParseFile(`${resultsDir}/${f}`)))
 
-  let csvFiles
+  const workbook = buildWorkbook(csvFiles, csvRows)
 
-  getCsvFiles()
-    .then(_csvFiles => {
-      csvFiles = _csvFiles
-
-      return Promise.all(csvFiles.map(f => readAndParseFile(`${resultsDir}/${f}`)))
-    })
-    .then(csvRows => {
-      csvRows.forEach((sheet, idx) => {
-        const sheetName = csvFiles[idx].replace('.csv', '')
-        console.log('Processing sheet:', sheetName)
-
-        const newSheet = workbook.add(sheetName)
-
-        // Sort the sheet by the 2nd column, license
-        const headingRow = sheet.shift()
-        sheet.sort((r1, r2) => {
-          const license1 = r1[1]
-          const license2 = r2[1]
-
-          return license1.localeCompare(license2)
-        })
-        sheet.unshift(headingRow)
-
-        // iterate over the sheet and add rows and columns
-        sheet.forEach((row, i) => {
-          row.forEach((column, j) => {
-            newSheet[i][j] = column
-          })
-        })
-      })
-
-      // this should save as "license-summary.xlsx", but for some reason is just ".xlsx"
-      workbook.save('license-summary')
-    })
+  const outputPath = path.resolve(__dirname, Const.xlsxFile)
+  await workbook.xlsx.writeFile(outputPath)
+  console.log('Saved:', outputPath)
 }
 
 if (require.main === module) {
@@ -86,5 +86,6 @@ if (require.main === module) {
 
 module.exports = {
   getCsvFiles,
-  readAndParseFile
+  readAndParseFile,
+  buildWorkbook
 }

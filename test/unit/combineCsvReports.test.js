@@ -3,7 +3,7 @@
 const Test = require('tape')
 const Sinon = require('sinon')
 const { Readable } = require('stream')
-const { getCsvFiles, readAndParseFile } = require('../../scripts/_combine_csv_reports')
+const { getCsvFiles, readAndParseFile, buildWorkbook } = require('../../scripts/_combine_csv_reports')
 const fs = require('fs')
 
 Test('getCsvFiles', t => {
@@ -91,6 +91,60 @@ Test('readAndParseFile', t => {
     t.deepEqual(rows, [], 'returns empty array')
 
     stub.restore()
+    t.end()
+  })
+
+  t.end()
+})
+
+Test('buildWorkbook', t => {
+  t.test('should create workbook with sheets from CSV data', t => {
+    const csvFiles = ['project-a.csv', 'project-b.csv']
+    const csvRows = [
+      [
+        ['package', 'license', 'github'],
+        ['pkg-a', 'MIT', 'https://github.com/a'],
+        ['pkg-b', 'Apache-2.0', 'https://github.com/b']
+      ],
+      [
+        ['package', 'license', 'github'],
+        ['pkg-c', 'ISC', 'https://github.com/c']
+      ]
+    ]
+
+    const workbook = buildWorkbook(csvFiles, csvRows)
+    t.equal(workbook.worksheets.length, 2, 'has 2 worksheets')
+    t.equal(workbook.worksheets[0].name, 'project-a', 'first sheet named correctly')
+    t.equal(workbook.worksheets[1].name, 'project-b', 'second sheet named correctly')
+
+    // Check data is sorted by license column (column 2)
+    const ws = workbook.worksheets[0]
+    t.equal(ws.rowCount, 3, 'has 3 rows (header + 2 data)')
+    t.equal(ws.columnCount, 3, 'has 3 columns')
+
+    // Verify header row
+    t.equal(ws.getCell(1, 1).value, 'package', 'header col 1')
+    t.equal(ws.getCell(1, 2).value, 'license', 'header col 2')
+    t.equal(ws.getCell(1, 3).value, 'github', 'header col 3')
+
+    // Verify data rows are sorted by license
+    t.equal(ws.getCell(2, 1).value, 'pkg-b', 'sorted row 1: package')
+    t.equal(ws.getCell(2, 2).value, 'Apache-2.0', 'sorted row 1: license')
+    t.equal(ws.getCell(2, 3).value, 'https://github.com/b', 'sorted row 1: github')
+    t.equal(ws.getCell(3, 1).value, 'pkg-a', 'sorted row 2: package')
+    t.equal(ws.getCell(3, 2).value, 'MIT', 'sorted row 2: license')
+    t.equal(ws.getCell(3, 3).value, 'https://github.com/a', 'sorted row 2: github')
+
+    // Verify second sheet
+    const ws2 = workbook.worksheets[1]
+    t.equal(ws2.rowCount, 2, 'second sheet has 2 rows')
+    t.equal(ws2.getCell(2, 1).value, 'pkg-c', 'second sheet data')
+    t.end()
+  })
+
+  t.test('should handle empty CSV data', t => {
+    const workbook = buildWorkbook([], [])
+    t.equal(workbook.worksheets.length, 0, 'no worksheets')
     t.end()
   })
 
