@@ -190,9 +190,13 @@ that publishes to npm on a `vX.Y.Z` tag. It deliberately does **not** use the
 `mojaloop/build` orb, because this package is a dependency of that orb's license
 gate — using the orb here would be circular.
 
-## Legacy tool (deprecated)
+## Legacy tool (removed)
 
-The previous `make build` / `config.toml` bash tool still lives in this repo
-(`Makefile`, `scripts/`, `config.toml`, `lib/`) so the old orb's legacy path
-keeps working during migration. It will be removed once all consumers are on
-`mojaloop/build@>=2.0.0`. Do not build on it.
+The previous `make build` / `config.toml` bash tool has been **removed**. It relied
+on an unmaintained `license-checker` fork and used `eval` / `docker cp` — the
+supply-chain and command-injection risks this package was created to eliminate.
+
+The `Makefile` is now a stub that exits non-zero with upgrade guidance. If your CI
+still uses the old `mojaloop/build` license path (`git clone … && make build`), it
+will fail by design — upgrade to **`mojaloop/build@>=2.0.0`**, which runs
+`npx @mojaloop/license-scanner-tool`.

@@ -1,23 +1,7 @@
-checked_out
-
-checked_out_2
-lib/toml-to-env
-results*
 node_modules
-.env
-
-# Private Env vars
-.env
-.env_override
 
 # npm auth (never commit/persist a registry token) [security: 3.4]
 .npmrc
 
 # local agent / tooling
 .claude
-
-
-#make artifacts
-build
-post-csv-to-excel
-post-summarize-csv
