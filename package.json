@@ -1,0 +1,64 @@
+{
+  "name": "@mojaloop/license-scanner-tool",
+  "version": "0.0.1",
+  "description": "SBOM-first license compliance gate for Mojaloop (Syft CycloneDX + curated SPDX allowlist).",
+  "license": "Apache-2.0",
+  "author": "Mojaloop",
+  "contributors": [
+    "Shashikant Hirugade <shashi.mojaloop@gmail.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mojaloop/license-scanner-tool.git"
+  },
+  "homepage": "https://github.com/mojaloop/license-scanner-tool#readme",
+  "bugs": {
+    "url": "https://github.com/mojaloop/license-scanner-tool/issues"
+  },
+  "bin": {
+    "license-scanner-tool": "src/cli.js"
+  },
+  "main": "src/gate.js",
+  "files": [
+    "src/",
+    "data.json"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "pre-commit": [
+    "lint",
+    "test",
+    "dep:check",
+    "audit:check"
+  ],
+  "scripts": {
+    "check": "node src/cli.js",
+    "validate": "node src/validate-policy.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test test/*.test.js",
+    "audit:check": "npx audit-ci --config ./audit-ci.jsonc",
+    "audit:fix": "npm audit fix",
+    "dep:check": "npx ncu -e 2",
+    "dep:update": "npx ncu -u",
+    "release": "npx standard-version --no-verify --releaseCommitMessageFormat 'chore(release): {{currentTag}} [skip ci]'",
+    "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'chore(snapshot): {{currentTag}}'"
+  },
+  "dependencies": {
+    "spdx-expression-parse": "4.0.0",
+    "spdx-license-ids": "3.0.21"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "audit-ci": "^7.1.0",
+    "eslint": "^9.39.0",
+    "globals": "^16.0.0",
+    "npm-check-updates": "22.2.0",
+    "pre-commit": "2.0.0",
+    "standard-version": "^9.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

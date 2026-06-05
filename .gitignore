@@ -10,6 +10,12 @@ node_modules
 .env
 .env_override
 
+# npm auth (never commit/persist a registry token) [security: 3.4]
+.npmrc
+
+# local agent / tooling
+.claude
+
 
 #make artifacts
 build
