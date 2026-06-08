@@ -5,9 +5,10 @@ SBOM, normalises component licences to canonical **SPDX**, and fails if any npm
 dependency's licence is not on a curated allowlist.
 
 This replaces the legacy bash tool (Syft-less, `eval`/`docker cp` based, depended
-on an unmaintained `license-checker` fork). The old tool is **deprecated** and
-kept only until consumers move to `mojaloop/build@>=2.0.0` — see
-[Legacy tool](#legacy-tool-deprecated).
+on an unmaintained `license-checker` fork), which is **removed in this release**.
+Consumers must move to `mojaloop/build@>=2.0.0` (which runs this package) — CI on
+the old orb path (`git clone … && make build`) will fail by design. See
+[Legacy tool](#legacy-tool-removed).
 
 ## Install / run
 
@@ -25,6 +26,48 @@ npx @mojaloop/license-scanner-tool sbom.cdx.json
 npx @mojaloop/license-scanner-tool --warn .
 ```
 Exit codes: `0` pass (or `--warn`), `1` violations, `2` usage/tool error.
+
+## Using it in another repo
+
+Four ways, best-first. (Prereqs: the package must be published; **Syft** on PATH
+for directory scans — not needed when you pass a CycloneDX SBOM; Node ≥ 20.)
+
+### 1. Through the orb — automatic (recommended for CI)
+If the repo's CI uses **`mojaloop/build@>=2.0.0`**, the license gate runs
+automatically — the orb's `license_scan` / `audit_licenses` jobs already do
+`generate_sbom` (Syft) → `license_gate` (`npx @mojaloop/license-scanner-tool`).
+**Nothing to wire per repo** — just be on orb `2.0.0`.
+
+### 2. CLI / npm script (local or custom CI)
+```bash
+npx @mojaloop/license-scanner-tool .            # scan source (Syft builds the SBOM)
+npx @mojaloop/license-scanner-tool sbom.cdx.json # gate a pre-built SBOM (no Syft)
+```
+```json
+// package.json
+"scripts": { "license:check": "npx @mojaloop/license-scanner-tool ." }
+```
+
+### 3. Git pre-push hook (local enforcement)
+With husky:
+```bash
+printf 'npx --yes @mojaloop/license-scanner-tool@^0 .\n' > .husky/pre-push
+```
+(or copy [hooks/pre-push](hooks/pre-push)). Bypass once with `LICENSE_CHECK_SKIP=1 git push`.
+
+### 4. Programmatically (library)
+```js
+const { evaluate } = require('@mojaloop/license-scanner-tool') // src/gate.js
+const sbom = require('./sbom.cdx.json')                        // a CycloneDX SBOM
+
+const { npm, violations } = evaluate(sbom)   // optional 2nd arg: custom policy
+if (violations.length) { console.error(violations.join('\n')); process.exit(1) }
+console.log(`OK — ${npm} npm components clean`)
+```
+`evaluate(sbom, policy?, now?)` → `{ npm, violations }`.
+
+> Before it's published, trial it from a path or branch:
+> `npm i -D 'github:mojaloop/license-scanner-tool#feat/sbom-license-gate'`.
 
 ## Where the SBOM comes from
 
