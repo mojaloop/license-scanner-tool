@@ -4,22 +4,7 @@ version: 2.1
 # This package is a foundational dependency of that orb's license gate, so releasing
 # it through the orb would be circular AND would block self-recovery from a bad
 # release. It also must test its own source, not the published version.
-#
-# SECURITY (see ci-config-orb-build/NPM_RELEASE_SECURITY_REVIEW.md):
-#   - Publish/release secrets live in a dedicated `release-secrets` context, used
-#     ONLY by release/github-release/publish-npm. `test` (all-branch, runs repo
-#     code) carries NO secret context. [3.2]
-#     ACTION REQUIRED: create the `release-secrets` context in CircleCI Org
-#     Settings and RESTRICT it to a release security group, holding:
-#       NPM_TOKEN, GIT_CI_EMAIL, GIT_CI_USER, GITHUB_TOKEN,
-#       SLACK_ACCESS_TOKEN, SLACK_TEMP_RELEASE_SUCCESS, SLACK_TEMP_RELEASE_FAILURE
-#   - Installs use --ignore-scripts; the npm token is written to $HOME/.npmrc
-#     (chmod 600, trap-removed), never the working tree. [3.1, 3.4]
-#   - CHANGELOG notes are passed via --notes-file, never sourced. [3.3]
-#   - Executor image is digest-pinned. [4.7]
-#   HELD (need org/provider support, tracked separately):
-#   - 3.5 npm --provenance (needs CircleCI OIDC trusted-publishing support)
-#   - 3.6 scoped GitHub App token for the release push (org-level)
+
 
 orbs:
   slack: circleci/slack@4.13.3
@@ -100,7 +85,7 @@ commands:
 jobs:
   test:
     # No secret context: this job runs repo-controlled code (lint, tests, self-scan)
-    # on every branch and must never have publish credentials in scope. [3.2]
+    # on every branch and must never have publish credentials in scope.
     executor: node
     steps:
       - alpine_deps
@@ -109,7 +94,7 @@ jobs:
       - display_versions
       - run:
           name: Install dependencies
-          command: npm ci --ignore-scripts # [3.1] never run dependency install scripts
+          command: npm ci --ignore-scripts # never run dependency install scripts
       - run:
           name: Lint (eslint)
           command: npm run lint
@@ -126,7 +111,7 @@ jobs:
           name: Self-scan (dogfood the gate on this package's own deps)
           command: |
             set -eu
-            # syft installer pinned to a release tag, not mutable main [4.6]
+            # syft installer pinned to a release tag, not mutable main
             curl -sSfL https://raw.githubusercontent.com/anchore/syft/v1.45.0/install.sh | sh -s -- -b /usr/local/bin v1.45.0
             node src/cli.js .
 
@@ -140,7 +125,7 @@ jobs:
       - configure_git
       - run:
           name: Install dependencies
-          command: npm ci --ignore-scripts # [3.1]
+          command: npm ci --ignore-scripts
       - run:
           name: Setup Slack config
           command: |
@@ -180,7 +165,7 @@ jobs:
           command: |
             set -eu
             RELEASE_TAG="$(jq -r .version package.json)"
-            # [3.3] validate version before use; notes are NOT exported to BASH_ENV
+            # validate version before use; notes are NOT exported to BASH_ENV
             echo "${RELEASE_TAG}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' \
               || { echo "Refusing: invalid version '${RELEASE_TAG}'"; exit 1; }
             echo "export RELEASE_TAG=${RELEASE_TAG}" >> "$BASH_ENV"
@@ -218,7 +203,7 @@ jobs:
       - display_versions
       - run:
           name: Install dependencies
-          command: npm ci --ignore-scripts # [3.1]
+          command: npm ci --ignore-scripts
       - run:
           name: Lint (eslint)
           command: npm run lint
@@ -241,8 +226,6 @@ jobs:
             echo "export SLACK_BUILD_ID=${CIRCLE_BUILD_NUM}" >> $BASH_ENV
             echo "export SLACK_CI_URL=${CIRCLE_BUILD_URL}" >> $BASH_ENV
       - run:
-          # [3.4][4.8] token only enters env here; written to $HOME (not the work tree),
-          # locked down, and removed on step exit. Strict mode + required-var assert.
           name: Authenticate and publish to npm
           command: |
             set -eu
@@ -285,7 +268,8 @@ workflows:
                 - /bugfix*/
 
       - release:
-          context: release-secrets
+          # org-global: GIT_CI_* + SLACK_*. Tag push via SSH user key (no token needed).
+          context: org-global
           requires:
             - test
           filters:
@@ -295,7 +279,8 @@ workflows:
                 - /release\/v.*/
 
       - github-release:
-          context: release-secrets
+          # org-release: GITHUB_TOKEN (restricted). org-global: GIT_CI_* + SLACK_*.
+          context: [org-global, org-release]
           requires:
             - release
           filters:
@@ -305,7 +290,8 @@ workflows:
                 - /release\/v.*/
 
       - publish-npm:
-          context: release-secrets
+          # org-release: NPM_TOKEN (restricted). org-global: SLACK_*.
+          context: [org-global, org-release]
           requires:
             - test
           filters:
