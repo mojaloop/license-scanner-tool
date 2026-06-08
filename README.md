@@ -66,8 +66,6 @@ console.log(`OK — ${npm} npm components clean`)
 ```
 `evaluate(sbom, policy?, now?)` → `{ npm, violations }`.
 
-> Before it's published, trial it from a path or branch:
-> `npm i -D 'github:mojaloop/license-scanner-tool#feat/sbom-license-gate'`.
 
 ## Where the SBOM comes from
 
