@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+#
+# Mojaloop license pre-flight (git pre-push hook).
+# Blocks a push if any dependency's licence is not on the allowlist.
+# Shares the exact policy used by CI.
+#
+# Emergency bypass:  LICENSE_CHECK_SKIP=1 git push
+#
+if [ "${LICENSE_CHECK_SKIP:-0}" = "1" ]; then
+  echo "license-check: skipped (LICENSE_CHECK_SKIP=1)"
+  exit 0
+fi
+
+if ! npx --yes @mojaloop/license-scanner-tool@^1 .; then
+  echo ""
+  echo "license-check: push blocked. Fix the dependency, or add a vetted alias/"
+  echo "exception to the policy via PR. Bypass once with: LICENSE_CHECK_SKIP=1 git push"
+  exit 1
+fi
