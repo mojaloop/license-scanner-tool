@@ -34,7 +34,10 @@ commands:
     steps:
       - run:
           name: Install base dependencies
-          command: apk --no-cache add bash git curl tar jq
+          # openssh-client provides `ssh` for `git push` over the SSH remote (Alpine lacks it);
+          # ca-certificates for TLS. Mirrors the orb's docker_dependencies (minus the native
+          # build toolchain this pure-JS package doesn't need).
+          command: apk --no-cache add bash git curl tar jq openssh-client ca-certificates
 
   configure_nvm:
     description: Install/select the Node version from .nvmrc via nvm (parity with the orb).
@@ -138,7 +141,8 @@ jobs:
           name: Generate changelog and bump package version
           command: |
             set -eu
-            npm run release
+            # --no-verify: skip git hooks (pre-commit) on the release commit, as the orb does
+            npm run release -- --no-verify
       - run:
           name: Push the release
           command: |
@@ -256,7 +260,6 @@ workflows:
             branches:
               ignore:
                 - main
-                - master
 
       - test: # no context — runs repo code on all branches [3.2]
           filters:
