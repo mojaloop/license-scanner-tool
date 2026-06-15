@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/mojaloop/license-scanner-tool/compare/v1.0.0...v1.1.0) (2026-06-15)
+
+
+### Features
+
+* added provision to add local exception list ([#36](https://github.com/mojaloop/license-scanner-tool/issues/36)) ([6c50f37](https://github.com/mojaloop/license-scanner-tool/commit/6c50f379c6b3dd74aea981d2c1045da2ee0f20dd))
+
 ## [0.1.0](https://github.com/mojaloop/license-scanner-tool/compare/v0.0.1...v0.1.0) (2026-06-09)
 
 
