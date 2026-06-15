@@ -37,9 +37,12 @@
  *   license-scanner-tool [options] [<dir>|<sbom.cdx.json>]
  *
  * Options:
- *   --warn         Report violations but always exit 0 (non-blocking mode).
- *   --syft <ver>   Syft version to install if missing (default: v1.45.0).
- *   -h, --help     Show help.
+ *   --warn             Report violations but always exit 0 (non-blocking mode).
+ *   --syft <ver>       Syft version to install if missing (default: v1.45.0).
+ *   --exceptions <p>   Path to a project-local exceptions file (default:
+ *                      ./.license-scanner.json if present). Waives UNDETERMINED
+ *                      findings only; cannot define allowed/aliases.
+ *   -h, --help         Show help.
  *
  * Default target is ".". Requires `syft` on PATH only when scanning a directory.
  * Exit codes: 0 = pass (or --warn), 1 = violations, 2 = usage/tool error.
@@ -47,7 +50,8 @@
 
 const fs = require('fs')
 const { execFileSync } = require('child_process')
-const { evaluate } = require('./gate')
+const { evaluate, DEFAULT_POLICY } = require('./gate')
+const { resolveLocalExceptionsPath, loadLocalExceptions } = require('./local-exceptions')
 
 function parseArgs (argv) {
   const opts = { target: '.', warn: false, syft: 'v1.45.0' }
@@ -56,6 +60,7 @@ function parseArgs (argv) {
     const a = argv[i]
     if (a === '--warn') opts.warn = true
     else if (a === '--syft') opts.syft = argv[++i]
+    else if (a === '--exceptions') opts.exceptions = argv[++i]
     else if (a === '-h' || a === '--help') opts.help = true
     else rest.push(a)
   }
@@ -94,7 +99,34 @@ function main () {
   }
 
   const sbom = loadSbom(opts.target, opts.syft)
-  const { npm, violations } = evaluate(sbom)
+
+  // Project-local exceptions (optional, additive): a consuming repo may waive
+  // its own UNDETERMINED findings via .license-scanner.json. Absent → unchanged.
+  let policy = DEFAULT_POLICY
+  const localPath = resolveLocalExceptionsPath({ exceptions: opts.exceptions, target: opts.target })
+  if (localPath) {
+    let local
+    try {
+      local = loadLocalExceptions(localPath, { bundledKeys: new Set(Object.keys(DEFAULT_POLICY.exceptions || {})) })
+    } catch (e) {
+      console.error(`license-scanner-tool: ${e.message}`)
+      process.exit(e.exitCode || 2)
+    }
+    console.log(`license-scanner-tool: loaded ${Object.keys(local.exceptions).length} local exception(s) from ${localPath}`)
+    for (const k of local.warnings.droppedCollision) {
+      console.warn(`  - ignored local exception ${k}: defined centrally, bundled policy wins`)
+    }
+    for (const k of local.warnings.skippedExpired) {
+      console.warn(`  - local exception ${k} has expired and will not apply`)
+    }
+    policy = { ...DEFAULT_POLICY, localExceptions: local.exceptions }
+  }
+
+  const { npm, violations, waived } = evaluate(sbom, policy)
+
+  for (const w of waived) {
+    console.log(`license-scanner-tool: WAIVED (local exception) ${w.key} — ${w.reason} (expires ${w.expires})`)
+  }
 
   if (violations.length === 0) {
     console.log(`license-scanner-tool: PASS (${npm} npm components, 0 violations)`)

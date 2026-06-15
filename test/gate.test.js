@@ -86,3 +86,36 @@ test('expired exception no longer waives', () => {
   const { violations } = evaluate(sbom([comp('bad', '1.0.0', [{ license: { name: 'Nonsense' } }])]), policy)
   assert.strictEqual(violations.length, 1)
 })
+
+// --- project-local exceptions (UNDETERMINED-only) --------------------------
+
+test('local exception waives an UNDETERMINED finding and reports it as waived', () => {
+  const policy = { allowed: ['MIT'], aliases: {}, exceptions: {}, localExceptions: { 'bad@1.0.0': { reason: 'MIT in LICENSE', expires: '2999-01-01' } } }
+  const { violations, waived } = evaluate(sbom([comp('bad', '1.0.0', [{ license: { name: '' } }])]), policy)
+  assert.strictEqual(violations.length, 0)
+  assert.strictEqual(waived.length, 1)
+  assert.strictEqual(waived[0].key, 'bad@1.0.0')
+  assert.match(waived[0].reason, /MIT in LICENSE/)
+})
+
+test('local exception does NOT waive a DISALLOWED finding', () => {
+  const policy = { allowed: ['MIT'], aliases: {}, exceptions: {}, localExceptions: { 'bad@1.0.0': { reason: 'r', expires: '2999-01-01' } } }
+  const { violations, waived } = evaluate(sbom([comp('bad', '1.0.0', [{ license: { id: 'GPL-3.0-only' } }])]), policy)
+  assert.strictEqual(waived.length, 0)
+  assert.strictEqual(violations.length, 1)
+  assert.match(violations[0], /DISALLOWED.*GPL-3\.0-only/)
+})
+
+test('expired local exception no longer waives (finding resurfaces)', () => {
+  const policy = { allowed: ['MIT'], aliases: {}, exceptions: {}, localExceptions: { 'bad@1.0.0': { reason: 'r', expires: '2000-01-01' } } }
+  const { violations, waived } = evaluate(sbom([comp('bad', '1.0.0', [{ license: { name: '' } }])]), policy)
+  assert.strictEqual(waived.length, 0)
+  assert.strictEqual(violations.length, 1)
+  assert.match(violations[0], /UNDETERMINED/)
+})
+
+test('a bundled exception still waives anything (incl. DISALLOWED)', () => {
+  const policy = { allowed: ['MIT'], aliases: {}, exceptions: { 'bad@1.0.0': { reason: 'r', expires: '2999-01-01' } } }
+  const { violations } = evaluate(sbom([comp('bad', '1.0.0', [{ license: { id: 'GPL-3.0-only' } }])]), policy)
+  assert.strictEqual(violations.length, 0)
+})

@@ -134,7 +134,7 @@ Before changing anything, find out what the package is *actually* licensed under
 | **DISALLOWED** | A valid, **permissive** SPDX licence missing from the allowlist (e.g. `MIT-0`, `0BSD`) | Add the SPDX id to `data.json → allowed`. |
 | **DISALLOWED** | A **copyleft / incompatible** licence (e.g. `GPL-3.0-only`, `AGPL`) | The gate is **correct** — do **not** allowlist it. Remove or replace the dependency. |
 | **UNDETERMINED** | The package declares a valid licence as **free text** (e.g. `"Apache 2.0"`, `"BSD License"`) | Add a vetted entry to `data.json → aliases`: `"<declared string>": "<SPDX id>"`. |
-| **UNDETERMINED** | The package has **no machine-readable licence**, but you confirmed a real, acceptable licence elsewhere (e.g. MIT on GitHub, missing from `package.json`) | Add a dated **exception** to `data.json → exceptions`. |
+| **UNDETERMINED** | The package has **no machine-readable licence**, but you confirmed a real, acceptable licence elsewhere (e.g. MIT on GitHub, missing from `package.json`) | Add a dated **exception** to `data.json → exceptions` (org-wide), **or** — if it's specific to your repo's dependency graph — a **project-local** exception (see below), no central release needed. |
 | **UNDETERMINED** | You **cannot** determine or trust the licence | Treat as a blocker — replace the dependency. |
 
 ### Step 3 — make the change (examples)
@@ -161,6 +161,28 @@ Before changing anything, find out what the package is *actually* licensed under
   "some-pkg@1.4.2": { "reason": "MIT on GitHub, not in package.json", "expires": "2027-01-01" }
 }
 ```
+
+**Add a project-local exception** — for an UNDETERMINED finding that's specific to
+**your** repo's dependency graph (e.g. a transitive dep with empty license
+metadata), waive it in your own repo, reviewed in your own PR, **without** a
+central tool/orb release. Create `.license-scanner.json` at the repo root:
+```jsonc
+// .license-scanner.json (repo root) — auto-discovered by the CLI/orb
+{
+  "exceptions": {
+    "seq-queue@0.0.5": { "reason": "MIT per LICENSE file; empty license field in package.json (via mysql2)", "expires": "2027-01-01" }
+  }
+}
+```
+The gate auto-discovers this file (or pass `--exceptions <path>`). To preserve the
+central gate's integrity, project-local exceptions:
+- waive **UNDETERMINED** findings only — a **DISALLOWED** (known copyleft/proprietary)
+  licence still fails and requires a central decision;
+- may define **`exceptions` only** — never `allowed`/`aliases` (those stay central; the tool errors if present);
+- must carry a non-empty `reason` and a `YYYY-MM-DD` `expires`;
+- are overridden by a central `data.json` exception on the same `name@version` (bundled wins).
+
+Only the repo-root file (or an explicit `--exceptions` path) is read — nested/dependency-provided files are ignored, so a transitive dep cannot ship its own waiver.
 
 ### Hard rules
 
