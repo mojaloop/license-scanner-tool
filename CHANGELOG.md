@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/mojaloop/license-scanner-tool/compare/v1.1.0...v1.1.1) (2026-06-16)
+
+
+### Bug Fixes
+
+* apply SPDX OR/AND semantics in the gate ([#37](https://github.com/mojaloop/license-scanner-tool/issues/37)) ([576aae6](https://github.com/mojaloop/license-scanner-tool/commit/576aae66bc213ce3adf88b2138f1d9423ebef63e))
+
 ## [1.1.0](https://github.com/mojaloop/license-scanner-tool/compare/v1.0.0...v1.1.0) (2026-06-15)
 
 
