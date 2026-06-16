@@ -45,6 +45,28 @@ test('blocks a copyleft licence (DISALLOWED)', () => {
   assert.match(violations[0], /DISALLOWED.*GPL-3\.0-only/)
 })
 
+test('"permissive OR copyleft" passes — you can pick the permissive side', () => {
+  const { violations } = evaluate(sbom([comp('node-forge', '1.4.0', [{ expression: 'BSD-3-Clause OR GPL-2.0' }])]))
+  assert.strictEqual(violations.length, 0)
+})
+
+test('Apache-2.0 OR MPL-1.1 passes', () => {
+  const { violations } = evaluate(sbom([comp('harmony-reflect', '1.6.2', [{ expression: 'Apache-2.0 OR MPL-1.1' }])]))
+  assert.strictEqual(violations.length, 0)
+})
+
+test('AND with a disallowed operand is DISALLOWED', () => {
+  const { violations } = evaluate(sbom([comp('a', '1.0.0', [{ expression: 'MIT AND GPL-3.0-only' }])]))
+  assert.strictEqual(violations.length, 1)
+  assert.match(violations[0], /DISALLOWED/)
+})
+
+test('OR with every operand disallowed is DISALLOWED', () => {
+  const { violations } = evaluate(sbom([comp('a', '1.0.0', [{ expression: 'GPL-2.0 OR GPL-3.0-only' }])]))
+  assert.strictEqual(violations.length, 1)
+  assert.match(violations[0], /DISALLOWED/)
+})
+
 test('UNLICENSED is proprietary -> UNDETERMINED, never aliased to Unlicense', () => {
   const { violations } = evaluate(sbom([comp('a', '1.0.0', [{ license: { name: 'UNLICENSED' } }])]))
   assert.strictEqual(violations.length, 1)

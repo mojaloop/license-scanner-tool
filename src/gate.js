@@ -51,6 +51,17 @@ function inScope (c) {
   return (c.purl || '').startsWith('pkg:npm/')
 }
 
+// "A OR B" passes if either side is allowed (you can pick the permissive one,
+// e.g. node-forge's "BSD-3-Clause OR GPL-2.0"); "A AND B" needs both.
+function isAllowed (token, allowed) {
+  if (allowed.has(token)) return true
+  const hasOr = /\sOR\s/i.test(token)
+  const hasAnd = /\sAND\s/i.test(token)
+  if (hasOr && !hasAnd) return token.split(/\s+OR\s+/i).some((op) => allowed.has(op.trim()))
+  if (hasAnd && !hasOr) return token.split(/\s+AND\s+/i).every((op) => allowed.has(op.trim()))
+  return false
+}
+
 function declaredNames (c) {
   return (c.licenses || []).map((l) => l.license && l.license.name).filter(Boolean).join('; ')
 }
@@ -103,7 +114,7 @@ function evaluate (sbom, policy = DEFAULT_POLICY, now = Date.now()) {
       continue
     }
     for (const t of ts) {
-      if (!allowed.has(t)) {
+      if (!isAllowed(t, allowed)) {
         // DISALLOWED — a known, non-allowlisted licence. Local exceptions cannot
         // waive this; it requires a central (bundled) exception or allowlist change.
         violations.push(`DISALLOWED: npm package ${c.name}@${c.version || '?'} uses licence "${t}", which is not on the allowlist (data.json -> allowed).`)
