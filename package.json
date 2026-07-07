@@ -1,6 +1,6 @@
 {
   "name": "@mojaloop/license-scanner-tool",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "SBOM-first license compliance gate for Mojaloop (Syft CycloneDX + curated SPDX allowlist).",
   "license": "Apache-2.0",
   "author": "Mojaloop",
