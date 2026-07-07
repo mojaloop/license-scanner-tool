@@ -53,9 +53,9 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "audit-ci": "^7.1.0",
-    "eslint": "^10.5.0",
-    "globals": "^17.6.0",
-    "npm-check-updates": "22.2.3",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
+    "npm-check-updates": "22.2.9",
     "pre-commit": "2.0.0",
     "standard-version": "^9.5.0"
   },
