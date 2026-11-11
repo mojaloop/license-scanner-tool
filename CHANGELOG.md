@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/mojaloop/license-scanner-tool/compare/v1.1.2...v1.1.3) (2026-11-11)
+
+
+### Bug Fixes
+
+* add psf-2.0 to allowlist ([#39](https://github.com/mojaloop/license-scanner-tool/issues/39)) ([5bfd386](https://github.com/mojaloop/license-scanner-tool/commit/5bfd3861d4faff56c1b43b4d15907306a32b7420))
+
 ### [1.1.2](https://github.com/mojaloop/license-scanner-tool/compare/v1.1.1...v1.1.2) (2026-07-07)
 
 ### [1.1.1](https://github.com/mojaloop/license-scanner-tool/compare/v1.1.0...v1.1.1) (2026-06-16)
