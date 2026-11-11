@@ -47,19 +47,27 @@
     "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'chore(snapshot): {{currentTag}}'"
   },
   "dependencies": {
-    "spdx-expression-parse": "4.0.0",
-    "spdx-license-ids": "3.0.23"
+    "spdx-expression-parse": "5.0.0",
+    "spdx-license-ids": "3.0.24"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "audit-ci": "^7.1.0",
-    "eslint": "^10.6.0",
-    "globals": "^17.7.0",
-    "npm-check-updates": "22.2.9",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "npm-check-updates": "23.1.1",
     "pre-commit": "2.0.0",
     "standard-version": "^9.5.0"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "overrides": {
+    "eslint": {
+      "minimatch": "11.0.8"
+    },
+    "@eslint/config-array": {
+      "minimatch": "11.0.8"
+    }
   }
 }
